@@ -49,10 +49,10 @@ class Human_Diagnostic(QObject):
         try:
             rospy.wait_for_service(service_name, timeout=3)
             self.record_service = rospy.ServiceProxy(service_name, SetBool)
-        except:
+        except Exception as e:
             self.record_button.setStyleSheet("QPushButton { background: red }")
             self.record_button.setText("Error")
-            rospy.logerr("Human Diagnostics: " + service_name + " Not available")
+            rospy.logerr('Human Diagnostics: ' + str(e))
 
         # Signal Connections
         self.footIMU_rate_signal.connect(self.showFootImuMessageRate)
@@ -146,6 +146,8 @@ class Human_Diagnostic(QObject):
             else:
                 self.record_button.setStyleSheet("QPushButton { background: red }")
         else:
+            self.record_button.setStyleSheet("QPushButton { background: red }")
+            self.record_button.setText("Error")
             rospy.logwarn("Human Diagnostics : Record Service Not Available")
 
     """ 1 Hz Timer Callback

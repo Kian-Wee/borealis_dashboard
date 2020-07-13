@@ -4,12 +4,15 @@ import rospkg
 import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from uwb_msgs.msg import UUBmsg, UWBReading
+from std_srvs.srv import SetBool
+import math
 
 class UAV_Diagnostic(QObject):
     publish_rate_signal = qt.QtCore.pyqtSignal() 
     delay_signal = qt.QtCore.pyqtSignal(float)  #seconds
     max_delay_signal = qt.QtCore.pyqtSignal(float)   #seconds
-    time_since_max_delay_signal = qt.QtCore.pyqtSignal()   
+    average_delay_signal = qt.QtCore.pyqtSignal()   
+    delay_std_deviation_signal = qt.QtCore.pyqtSignal()
     port_status_signal = qt.QtCore.pyqtSignal(str)
     ping_status_signal = qt.QtCore.pyqtSignal(str)
     start_record_signal = qt.QtCore.pyqtSignal(bool)
@@ -22,7 +25,11 @@ class UAV_Diagnostic(QObject):
         self.topic = topic
         self.widget = widget
         self.max_delay = 0.0
-        self.max_delay_time_stamp = 0.0
+        self.average_delay = 0.0
+        self.delay_std_deviation = 0.0
+        self.total_delay = 0.0
+        self.total_squared_delay = 0.0
+        self.total_msg_count = 0
         self.record = False
         self.uav_name = uav_name
 
@@ -30,7 +37,8 @@ class UAV_Diagnostic(QObject):
         self.publish_rate_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_publish_rate_label')
         self.delay_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_delay_label')
         self.max_delay_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_max_delay_label')
-        self.TSMD_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_TSMD_label')
+        self.average_delay_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_average_delay_label')
+        self.delay_std_deviation_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_delay_std_deviation_label')
         self.port_status_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_port_status_label')
         self.ping_status_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_ping_status_label')
         self.value_range_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_value_range_label')
@@ -49,16 +57,17 @@ class UAV_Diagnostic(QObject):
         try:
             rospy.wait_for_service(service_name, timeout=3)
             self.record_service = rospy.ServiceProxy(service_name, SetBool)
-        except:
+        except Exception as e:
             self.record_button.setStyleSheet("QPushButton { background: red }")
             self.record_button.setText("Error")
-            rospy.logerr("UAV Diagnostics: " + service_name + " Not available")
+            rospy.logerr('UAV Diagnostics: ' + str(e))
 
         # Signal Connections
         self.publish_rate_signal.connect(self.showMessageRate)
         self.delay_signal.connect(self.showMessageDelay)
         self.max_delay_signal.connect(self.showMaxDelay)
-        self.time_since_max_delay_signal.connect(self.showTSMD)
+        self.average_delay_signal.connect(self.showAverageDelay)
+        self.delay_std_deviation_signal.connect(self.showDelayStdDeviation)
         self.value_out_of_range_signal.connect(self.showValueRange)
         self.record_button.clicked.connect(self.recordBag)
         
@@ -74,29 +83,36 @@ class UAV_Diagnostic(QObject):
         self.publish_rate_label.setText('0')
         self.delay_label.setText('0')
         self.max_delay_label.setText('0')
-        self.TSMD_label.setText('0')
+        self.average_delay_label.setText('0')
+        self.delay_std_deviation_label.setText('0')
         self.port_status_label.setText('OK')
         self.ping_status_label.setText('OK')
         self.value_range_label.setText('OK')
         self.record_button.setText('Start Recording')
         self.max_delay = 0.0
+        self.total_delay = 0.0
+        self.total_squared_delay = 0.0
+        self.total_msg_count = 0
 
         self.publish_rate_label.setStyleSheet("")
         self.delay_label.setStyleSheet("")
         self.max_delay_label.setStyleSheet("")
-        self.TSMD_label.setStyleSheet("")
+        self.average_delay_label.setStyleSheet("")
+        self.delay_std_deviation_label.setStyleSheet("")
         self.port_status_label.setStyleSheet("QLabel { background: rgb(71, 255, 62) }")
         self.ping_status_label.setStyleSheet("QLabel { background: rgb(71, 255, 62) }")
         self.value_range_label.setStyleSheet("QLabel { background: rgb(71, 255, 62) }")
         self.record_button.setStyleSheet("")
         
     def UUBCallback(self, msg):
+        # Calculate Delay
         msgTime = msg.header.stamp.secs +  msg.header.stamp.nsecs * 1e-9
         curentTime = rospy.get_time()
         msgDelay = curentTime - msgTime 
-        if msgDelay > self.max_delay:
+
+        # Update Max Delay
+        if abs(msgDelay) > abs(self.max_delay):
             self.max_delay = msgDelay
-            self.max_delay_time_stamp = curentTime
             self.max_delay_signal.emit(self.max_delay)
         
         for reading in msg.readings:
@@ -105,8 +121,16 @@ class UAV_Diagnostic(QObject):
                 break
             self.value_out_of_range_signal.emit(True)
 
-            
+        # Calculate Average & Std Deviation
+        self.total_delay += msgDelay
+        self.total_squared_delay += (msgDelay**2)
+        self.total_msg_count += 1
+        self.average_delay = float(self.total_delay) / self.total_msg_count
+        self.delay_std_deviation = math.sqrt(  float(self.total_squared_delay) / self.total_msg_count - math.pow(self.average_delay, 2) )
+
         self.delay_signal.emit(msgDelay)
+        self.average_delay_signal.emit()
+        self.delay_std_deviation_signal.emit()
     
     def showMessageRate(self):
         try:
@@ -136,12 +160,23 @@ class UAV_Diagnostic(QObject):
 
         self.max_delay_label.setText(str(maxDelay))
 
-    """ Show Time Since Max Delay
-    """
-    def showTSMD(self):
-        if self.max_delay > 0:
-            tsmd = round( (rospy.get_time() - self.max_delay_time_stamp), 2)
-            self.TSMD_label.setText(str(tsmd))
+    def showAverageDelay(self):
+        averageDelay = round( self.average_delay * 1000, 2) # Milliseconds
+        if abs(averageDelay) > 100:
+            self.average_delay_label.setStyleSheet("QLabel { background: rgb(255, 170, 0) }")
+        else:
+            self.average_delay_label.setStyleSheet("")
+
+        self.average_delay_label.setText(str(averageDelay))
+
+    def showDelayStdDeviation(self):
+        delayStdDeviation = round( self.delay_std_deviation * 1000, 2) # Milliseconds
+        if abs(delayStdDeviation) > 100:
+            self.delay_std_deviation_label.setStyleSheet("QLabel { background: rgb(255, 170, 0) }")
+        else:
+            self.delay_std_deviation_label.setStyleSheet("")
+
+        self.delay_std_deviation_label.setText(str(delayStdDeviation))
 
     """ Show Value of range error
         :param status: Value out of range status
@@ -170,6 +205,8 @@ class UAV_Diagnostic(QObject):
             else:
                 self.record_button.setStyleSheet("QPushButton { background: red }")
         else:
+            self.record_button.setStyleSheet("QPushButton { background: red }")
+            self.record_button.setText("Error")
             rospy.logwarn("UAV Diagnostics : " + self.uav_name + " Record Service Not Available")
     
     """ 1 Hz Timer Callback
@@ -177,8 +214,6 @@ class UAV_Diagnostic(QObject):
     def timerCallback(self):
         # Publish Message Rate
         self.publish_rate_signal.emit()
-        # Update TSMD
-        self.time_since_max_delay_signal.emit()
         
         
 

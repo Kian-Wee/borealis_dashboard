@@ -52,11 +52,7 @@ class Human_Diagnostic(QObject):
         except Exception as e:
             self.record_button.setStyleSheet("QPushButton { background: red }")
             self.record_button.setText("Error")
-<<<<<<< HEAD
             rospy.logwarn ("Human Diagnostics : Exception:" + str(e))
-=======
-            rospy.logerr('Human Diagnostics: ' + str(e))
->>>>>>> a487fc3bae5c13dfa9146af057fe0bb2e7552057
 
         # Signal Connections
         self.footIMU_rate_signal.connect(self.showFootImuMessageRate)
@@ -150,11 +146,8 @@ class Human_Diagnostic(QObject):
             else:
                 self.record_button.setStyleSheet("QPushButton { background: red }")
         else:
-<<<<<<< HEAD
-=======
             self.record_button.setStyleSheet("QPushButton { background: red }")
             self.record_button.setText("Error")
->>>>>>> a487fc3bae5c13dfa9146af057fe0bb2e7552057
             rospy.logwarn("Human Diagnostics : Record Service Not Available")
 
     """ 1 Hz Timer Callback

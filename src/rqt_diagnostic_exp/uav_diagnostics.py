@@ -4,6 +4,8 @@ import rospkg
 import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from uwb_msgs.msg import UUBmsg, UWBReading
+from std_srvs.srv import SetBool
+import math
 
 class UAV_Diagnostic(QObject):
     publish_rate_signal = qt.QtCore.pyqtSignal() 
@@ -24,6 +26,7 @@ class UAV_Diagnostic(QObject):
         self.max_delay = 0.0
         self.max_delay_time_stamp = 0.0
         self.record = False
+        self.uav_name = uav_name
 
         # Retrieve GUI Components
         self.publish_rate_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_publish_rate_label')
@@ -42,12 +45,24 @@ class UAV_Diagnostic(QObject):
         rospy.Subscriber(topic, UUBmsg, self.UUBCallback)
         # TODO Subscribe to Diagnostic Topic
 
+        # Services
+        service_name = uav_name + '_bag_recorder/record_bag'
+        self.record_service = None
+        try:
+            rospy.wait_for_service(service_name, timeout=3)
+            self.record_service = rospy.ServiceProxy(service_name, SetBool)
+        except Exception as e:
+            self.record_button.setStyleSheet("QPushButton { background: red }")
+            self.record_button.setText("Error")
+            rospy.logwarn ("UAV Diagnostics :" + self.uav_name + " Exception:" + str(e))
+
         # Signal Connections
         self.publish_rate_signal.connect(self.showMessageRate)
         self.delay_signal.connect(self.showMessageDelay)
         self.max_delay_signal.connect(self.showMaxDelay)
         self.time_since_max_delay_signal.connect(self.showTSMD)
         self.value_out_of_range_signal.connect(self.showValueRange)
+        self.record_button.clicked.connect(self.recordBag)
         
 
         # Start Class timer
@@ -66,6 +81,7 @@ class UAV_Diagnostic(QObject):
         self.ping_status_label.setText('OK')
         self.value_range_label.setText('OK')
         self.record_button.setText('Start Recording')
+        self.max_delay = 0.0
 
         self.publish_rate_label.setStyleSheet("")
         self.delay_label.setStyleSheet("")
@@ -80,7 +96,7 @@ class UAV_Diagnostic(QObject):
         msgTime = msg.header.stamp.secs +  msg.header.stamp.nsecs * 1e-9
         curentTime = rospy.get_time()
         msgDelay = curentTime - msgTime 
-        if msgDelay > self.max_delay:
+        if math.fabs(msgDelay) > math.fabs(self.max_delay):
             self.max_delay = msgDelay
             self.max_delay_time_stamp = curentTime
             self.max_delay_signal.emit(self.max_delay)
@@ -142,7 +158,22 @@ class UAV_Diagnostic(QObject):
             self.value_range_label.setStyleSheet("QLabel { background: red }")
             self.value_range_label.setText(str("OOR"))
 
-
+    def recordBag(self):
+        if not (self.record_service == None):
+            self.record = not self.record
+            resp = self.record_service(self.record)
+            if resp.success:
+                if self.record:
+                    self.record_button.setStyleSheet("QPushButton { background: qlineargradient(spread:pad, x1:1, y1:1, x2:1, y2:0, stop:0 rgba(255, 0, 0, 215), stop:1 rgba(255, 255, 255, 255)) }")
+                    self.record_button.setText("Stop Recording")
+                else:
+                    self.record_button.setStyleSheet("")
+                    self.record_button.setText("Stop Recording")
+            else:
+                self.record_button.setStyleSheet("QPushButton { background: red }")
+        else:
+            rospy.logwarn("UAV Diagnostics : " + self.uav_name + " Record Service Not Available")
+    
     """ 1 Hz Timer Callback
     """
     def timerCallback(self):

@@ -6,6 +6,7 @@ import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
+from std_srvs.srv import SetBool
 
 class Human_Diagnostic(QObject):
     footIMU_rate_signal = qt.QtCore.pyqtSignal() 
@@ -42,12 +43,24 @@ class Human_Diagnostic(QObject):
         rospy.Subscriber(self.waistIMU_topic, Imu, self.waistIMU_rate.callback_hz, callback_args=self.waistIMU_topic)
         rospy.Subscriber(self.odometry_topic, Odometry, self.odometry_rate.callback_hz, callback_args=self.odometry_topic)
 
+        # Services
+        service_name = 'human_bag_recorder/record_bag'
+        self.record_service = None
+        try:
+            rospy.wait_for_service(service_name, timeout=3)
+            self.record_service = rospy.ServiceProxy(service_name, SetBool)
+        except Exception as e:
+            self.record_button.setStyleSheet("QPushButton { background: red }")
+            self.record_button.setText("Error")
+            rospy.logwarn ("Human Diagnostics : Exception:" + str(e))
+
         # Signal Connections
         self.footIMU_rate_signal.connect(self.showFootImuMessageRate)
         self.waistIMU_rate_signal.connect(self.showWaistImuMessageRate)
         self.Odometry_rate_signal.connect(self.showOdometryMessageRate)
         self.cpu_usage_signal.connect(self.showCpuUsage)
         self.ram_usage_signal.connect(self.showRamUsage)
+        self.record_button.clicked.connect(self.recordBag)
 
         
         # Start Class timer
@@ -72,7 +85,6 @@ class Human_Diagnostic(QObject):
         self.ram_usage_label.setStyleSheet("")
         self.record_button.setStyleSheet("")
         
-    
     def showFootImuMessageRate(self):
         try:
             rate = str(round( (self.footIMU_rate.get_hz(topic=self.footIMU_topic)[0]), 2))
@@ -119,6 +131,22 @@ class Human_Diagnostic(QObject):
         else:
             self.ram_usage_label.setStyleSheet("")
         self.ram_usage_label.setText(str(round(ram_usage)) + '%')
+
+    def recordBag(self):
+        if not (self.record_service == None):
+            self.record = not self.record
+            resp = self.record_service(self.record)
+            if resp.success:
+                if self.record:
+                    self.record_button.setStyleSheet("QPushButton { background: qlineargradient(spread:pad, x1:1, y1:1, x2:1, y2:0, stop:0 rgba(255, 0, 0, 215), stop:1 rgba(255, 255, 255, 255)) }")
+                    self.record_button.setText("Stop Recording")
+                else:
+                    self.record_button.setStyleSheet("")
+                    self.record_button.setText("Stop Recording")
+            else:
+                self.record_button.setStyleSheet("QPushButton { background: red }")
+        else:
+            rospy.logwarn("Human Diagnostics : Record Service Not Available")
 
     """ 1 Hz Timer Callback
     """

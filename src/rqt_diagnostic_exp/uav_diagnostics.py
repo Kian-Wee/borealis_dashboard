@@ -31,6 +31,7 @@ class UAV_Diagnostic(QObject):
         self.total_squared_delay = 0.0
         self.total_msg_count = 0
         self.record = False
+        self.auto_follow = False
         self.uav_name = uav_name
 
         # Retrieve GUI Components
@@ -43,6 +44,7 @@ class UAV_Diagnostic(QObject):
         self.ping_status_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_ping_status_label')
         self.value_range_label = self.widget.findChild(qt.QtWidgets.QLabel, uav_name + '_value_range_label')
         self.record_button = self.widget.findChild(qt.QtWidgets.QPushButton, uav_name + '_record_pushButton')
+        self.autonomous_button = self.widget.findChild(qt.QtWidgets.QPushButton, uav_name + '_autonomous_pushButton')
         
 
         # Subscribers
@@ -51,7 +53,8 @@ class UAV_Diagnostic(QObject):
         rospy.Subscriber(topic, UUBmsg, self.UUBCallback)
         # TODO Subscribe to Diagnostic Topic
 
-        # Services
+        #### Services ####
+        # Bag Recorder Service
         service_name = uav_name + '_bag_recorder/record_bag'
         self.record_service = None
         try:
@@ -62,6 +65,17 @@ class UAV_Diagnostic(QObject):
             self.record_button.setText("Error")
             rospy.logwarn ("UAV Diagnostics :" + self.uav_name + " Exception:" + str(e))
 
+        # Autonomous Mode Service
+        autonomous_mode_service_name = uav_name + '/follow_me/enable'
+        self.autonomous_mode_service = None
+        try:
+            rospy.wait_for_service(autonomous_mode_service_name, timeout=3)
+            self.autonomous_mode_service = rospy.ServiceProxy(autonomous_mode_service_name, SetBool)
+        except Exception as e:
+            self.autonomous_button.setStyleSheet("QPushButton { background: red }")
+            self.autonomous_button.setText("Error")
+            rospy.logwarn ("UAV Diagnostics :" + self.uav_name + " Exception:" + str(e))
+
         # Signal Connections
         self.publish_rate_signal.connect(self.showMessageRate)
         self.delay_signal.connect(self.showMessageDelay)
@@ -70,6 +84,7 @@ class UAV_Diagnostic(QObject):
         self.delay_std_deviation_signal.connect(self.showDelayStdDeviation)
         self.value_out_of_range_signal.connect(self.showValueRange)
         self.record_button.clicked.connect(self.recordBag)
+        self.autonomous_button.clicked.connect(self.autonomousFollow)
         
 
         # Start Class timer
@@ -89,6 +104,7 @@ class UAV_Diagnostic(QObject):
         self.ping_status_label.setText('OK')
         self.value_range_label.setText('OK')
         self.record_button.setText('Start Recording')
+        self.autonomous_button.setText('Autonomous Mode OFF')
         self.max_delay = 0.0
         self.total_delay = 0.0
         self.total_squared_delay = 0.0
@@ -103,6 +119,7 @@ class UAV_Diagnostic(QObject):
         self.ping_status_label.setStyleSheet("QLabel { background: rgb(71, 255, 62) }")
         self.value_range_label.setStyleSheet("QLabel { background: rgb(71, 255, 62) }")
         self.record_button.setStyleSheet("")
+        self.autonomous_button.setStyleSheet("")
         
     def UUBCallback(self, msg):
         # Calculate Delay
@@ -208,6 +225,26 @@ class UAV_Diagnostic(QObject):
             self.record_button.setStyleSheet("QPushButton { background: red }")
             self.record_button.setText("Error")
             rospy.logwarn("UAV Diagnostics : " + self.uav_name + " Record Service Not Available")
+    
+    def autonomousFollow(self):
+        if not (self.autonomous_mode_service == None):
+            self.auto_follow = not self.auto_follow
+            resp = self.autonomous_mode_service(self.auto_follow)
+            if resp.success:
+                if self.auto_follow:
+                    self.autonomous_button.setStyleSheet("QPushButton { background: rgb(71, 255, 62) }")
+                    self.autonomous_button.setText("Autonomous Mode ON")
+                else:
+                    self.autonomous_button.setStyleSheet("")
+                    self.autonomous_button.setText("Autonomous Mode OFF")
+            else:
+                self.autonomous_button.setStyleSheet("QPushButton { background: red }")
+                self.autonomous_button.setText("Error")
+                rospy.logwarn("UAV Diagnostics : " + self.uav_name + " Command returned 'Fail'")
+        else:
+            self.autonomous_button.setStyleSheet("QPushButton { background: red }")
+            self.autonomous_button.setText("Error")
+            rospy.logwarn("UAV Diagnostics : " + self.uav_name + " Follow Me Enable Service Not Available")
     
     """ 1 Hz Timer Callback
     """

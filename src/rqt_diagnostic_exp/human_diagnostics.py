@@ -16,7 +16,7 @@ class Human_Diagnostic(QObject):
     ram_usage_signal = qt.QtCore.pyqtSignal()
     
 
-    def __init__(self, widget, footIMU_topic, waistIMU_topic, odometry_topic):
+    def __init__(self, layout, footIMU_topic, waistIMU_topic, odometry_topic):
         super(Human_Diagnostic, self).__init__()
         
         # Attributes
@@ -25,15 +25,17 @@ class Human_Diagnostic(QObject):
         self.odometry_topic = odometry_topic
         self.record = False
 
-        self.widget = widget
+        self.layout = layout
 
-        # Retrieve GUI Components
-        self.footIMU_label = self.widget.findChild(qt.QtWidgets.QLabel,  'human_footIMU_rate_label')
-        self.waistIMU_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_waistIMU_rate_label')
-        self.odometry_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_odometry_rate_label')
-        self.cpu_usage_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_CPU_usage_label')
-        self.ram_usage_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_RAM_usage_label')
-        self.record_button = self.widget.findChild(qt.QtWidgets.QPushButton, 'human_record_pushButton')
+        self.createLayout(self.layout)
+
+        # # Retrieve GUI Components
+        # self.footIMU_label = self.widget.findChild(qt.QtWidgets.QLabel,  'human_footIMU_rate_label')
+        # self.waistIMU_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_waistIMU_rate_label')
+        # self.odometry_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_odometry_rate_label')
+        # self.cpu_usage_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_CPU_usage_label')
+        # self.ram_usage_label = self.widget.findChild(qt.QtWidgets.QLabel, 'human_RAM_usage_label')
+        # self.record_button = self.widget.findChild(qt.QtWidgets.QPushButton, 'human_record_pushButton')
 
         # Subscribers
         self.footIMU_rate = rostopic.ROSTopicHz(-1)
@@ -66,6 +68,50 @@ class Human_Diagnostic(QObject):
         # Start Class timer
         self.classTimer = self.ClassTimer(self.timerCallback)
         self.classTimer.start()
+
+    def createLayout(self, layout_):
+        layout = qt.QtWidgets.QFormLayout()
+
+        footIMUDesc = qt.QtWidgets.QLabel("Foot IMU Rate")
+        self.footIMU_label = qt.QtWidgets.QLabel("0")
+        self.footIMU_label.setAlignment(qt.QtCore.Qt.AlignRight)
+
+        waistIMUDesc = qt.QtWidgets.QLabel("Waist IMU Rate")
+        self.waistIMU_label = qt.QtWidgets.QLabel("0")
+        self.waistIMU_label.setAlignment(qt.QtCore.Qt.AlignRight)
+
+        odometryDesc = qt.QtWidgets.QLabel("Odometry Rate")
+        self.odometry_label = qt.QtWidgets.QLabel("0")
+        self.odometry_label.setAlignment(qt.QtCore.Qt.AlignRight)
+
+        cpuUsageDesc = qt.QtWidgets.QLabel("CPU Usage")
+        self.cpu_usage_label = qt.QtWidgets.QLabel("0")
+        self.cpu_usage_label.setAlignment(qt.QtCore.Qt.AlignRight)
+
+        ramUsageDesc = qt.QtWidgets.QLabel("RAM Usage")
+        self.ram_usage_label = qt.QtWidgets.QLabel("0")
+        self.ram_usage_label.setAlignment(qt.QtCore.Qt.AlignRight)
+
+        layout.addRow(footIMUDesc, self.footIMU_label)
+        layout.addRow(waistIMUDesc, self.waistIMU_label)
+        layout.addRow(odometryDesc, self.odometry_label)
+        layout.addRow(cpuUsageDesc, self.cpu_usage_label)
+        layout.addRow(ramUsageDesc, self.ram_usage_label)
+
+        self.record_button = qt.QtWidgets.QPushButton("Start Recording")
+
+        boxLayout = qt.QtWidgets.QVBoxLayout()
+        boxLayout.addSpacing(20)
+       
+        boxLayout.addLayout(layout)
+        boxLayout.addWidget(self.record_button)
+
+        group = qt.QtWidgets.QGroupBox("Human")
+        group.setStyleSheet("QGroupBox { border: 1px solid black; }")
+        # group.setStyleSheet("QGroupBox { border: 1px solid black; border-radius: 1px; } QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top; }")
+        group.setLayout(boxLayout)
+
+        layout_.addWidget(group)
 
     def deinit(self):
         pass
@@ -142,7 +188,7 @@ class Human_Diagnostic(QObject):
                     self.record_button.setText("Stop Recording")
                 else:
                     self.record_button.setStyleSheet("")
-                    self.record_button.setText("Stop Recording")
+                    self.record_button.setText("Start Recording")
             else:
                 self.record_button.setStyleSheet("QPushButton { background: red }")
         else:

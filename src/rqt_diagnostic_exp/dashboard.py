@@ -26,21 +26,23 @@ class Dashboard(Plugin):
                       dest="quiet",
                       help="Put plugin in silent mode")
         args, unknowns = parser.parse_known_args(context.argv())
-        if not args.quiet:
-            print 'arguments: ', args
-            print 'unknowns: ', unknowns
+
+        # print (type(context))
+        # if not args.quiet:
+        #     print 'arguments: ', args
+        #     print 'unknowns: ', unknowns
 
         # Create QWidget
         self._widget = qt.QtWidgets.QWidget()
         # self._widget = QWidget()
         # Get path to UI file which should be in the "resource" folder of this package
-        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_diagnostic_exp'), 'resource', 'Dashboard.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_diagnostic_exp'), 'resource', 'Form.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
         # Give QObjects reasonable names
         self._widget.setObjectName('DashboardUi')
 
-        print (type(context))
+        
         if context.serial_number() > 1:
             self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
 
@@ -48,25 +50,41 @@ class Dashboard(Plugin):
         self.record = False
 
         # Fetch GUI Components
-        self.record_all_button = self._widget.findChild(qt.QtWidgets.QPushButton, 'record_all_pushButton')
-        self.clear_button = self._widget.findChild(qt.QtWidgets.QPushButton, 'clear_pushButton')
-        self.exit_button = self._widget.findChild(qt.QtWidgets.QPushButton, 'exit_pushButton')
-
-        # Connect Signals
-        self.record_all_button.clicked.connect(self.record_all)
-        self.clear_button.clicked.connect(self.clear)
-        self.exit_button.clicked.connect(self.exit)
+        # self.record_all_button = self._widget.findChild(qt.QtWidgets.QPushButton, 'record_all_pushButton')
+        # self.clear_button = self._widget.findChild(qt.QtWidgets.QPushButton, 'clear_pushButton')
+        # self.exit_button = self._widget.findChild(qt.QtWidgets.QPushButton, 'exit_pushButton')
 
         # Add widget to the user interface
         context.add_widget(self._widget)
+        
+        indicators_layout = qt.QtWidgets.QHBoxLayout()
     
-        self.uav1 = UAV_Diagnostic(self._widget, 'UUB1', 'uav1')
-        self.uav2 = UAV_Diagnostic(self._widget, 'UUB2', 'uav2')
-        self.uav3 = UAV_Diagnostic(self._widget, 'UUB3', 'uav3')
-        self.human = Human_Diagnostic(self._widget, footIMU_topic="footIMU/IMU", waistIMU_topic="waistIMU/IMU", odometry_topic="imu_odometry")
+        self.human = Human_Diagnostic(indicators_layout, footIMU_topic="footIMU/IMU", waistIMU_topic="waistIMU/IMU", odometry_topic="imu_odometry")
+        # self.uav1 = UAV_Diagnostic(layout, left_topic='/UAV1/UAV1_left', right_topic='/UAV1/UAV1_right', odom_topic="/uav1/odom", uav_name='UAV1')
+        # self.uav2 = UAV_Diagnostic(layout, left_topic='/UAV2/UAV2_left', right_topic='/UAV2/UAV2_right', odom_topic="/uav2/odom", uav_name='UAV2')
+        # self.uav3 = UAV_Diagnostic(layout, left_topic='/UAV3/UAV3_left', right_topic='/UAV3/UAV3_right', odom_topic="/uav3/odom", uav_name='UAV3')
+        self.uav1 = UAV_Diagnostic(indicators_layout, left_topic='/UAV1/UAV1_left', right_topic='/UAV1/UAV1_right', odom_topic="/camera_1/odom/sample", uav_name='UAV1')
+        self.uav2 = UAV_Diagnostic(indicators_layout, left_topic='/UAV2/UAV2_left', right_topic='/UAV2/UAV2_right', odom_topic="/camera_2/odom/sample", uav_name='UAV2')
+        self.uav3 = UAV_Diagnostic(indicators_layout, left_topic='/UAV3/UAV3_left', right_topic='/UAV3/UAV3_right', odom_topic="/camera_3/odom/sample", uav_name='UAV3')
+        
+        button_layout = qt.QtWidgets.QVBoxLayout()
+        exit_button = qt.QtWidgets.QPushButton("Exit")
+        clear_button = qt.QtWidgets.QPushButton("Clear")
 
-    def printButtonPressed(self):
-        print "pressed"
+        button_layout.addWidget(clear_button)
+        button_layout.addWidget(exit_button)
+
+        # Connect Signals
+        # self.record_all_button.clicked.connect(self.record_all)
+        clear_button.clicked.connect(self.clear)
+        exit_button.clicked.connect(self.exit)
+
+        dashboard_layout = qt.QtWidgets.QVBoxLayout()
+        dashboard_layout.addLayout(indicators_layout)
+        dashboard_layout.addLayout(button_layout)
+
+        self._widget.setLayout(dashboard_layout)
+    
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here

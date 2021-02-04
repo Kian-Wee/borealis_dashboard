@@ -2,9 +2,9 @@
 
 import sys
 
-from rqt_diagnostic_exp.dashboard import Dashboard
+from borealis_dashboard.dashboard import Dashboard
 from rqt_gui.main import Main
 
-plugin = 'rqt_diagnostic_exp'
+plugin = 'borealis_dashboard'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))

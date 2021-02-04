@@ -2,7 +2,7 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
   
 d = generate_distutils_setup(
-    packages=['rqt_diagnostic_exp'],
+    packages=['borealis_dashboard'],
     package_dir={'': 'src'},
 )
 

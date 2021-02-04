@@ -1,4 +1,4 @@
-# Boreolis Diagnostic Dashboard
+# Boreolis Experiment Dashboard
 
 Boreolis Project Diagnostic Dashboard RQT Plugin
 
@@ -7,6 +7,8 @@ Boreolis Project Diagnostic Dashboard RQT Plugin
 * Python
 * QT5
 * uwb_msgs (Custom Message Type)
+* pose_to_path (Fused Odometry visualization package)
+* ros_launcher (Required on client computers)
   
   
 **Install** <br /> 
@@ -26,4 +28,8 @@ Boreolis Project Diagnostic Dashboard RQT Plugin
 #### Published Topics
 - None
 
+### Note
+
+Before running the dashboard, make sure you configure the "recorded_topics" and "saved_directory" parameters in config/parameters.yaml file. 
+These parameters relate to the rosbag recording for the experiment.
 

@@ -1,0 +1,7 @@
+<launch>	
+  <!-- Start Rviz   -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find borealis_dashboard)/config/borealis.rviz"/>
+</launch>
+
+
+

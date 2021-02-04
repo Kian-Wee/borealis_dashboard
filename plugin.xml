@@ -1,11 +1,11 @@
 <library path="src">
-  <class name="Dashboard" type="rqt_diagnostic_exp.dashboard.Dashboard" base_class_type="rqt_gui_py::Plugin">
+  <class name="Dashboard" type="borealis_dashboard.dashboard.Dashboard" base_class_type="rqt_gui_py::Plugin">
     <description>
       Boreolis Project Experiment Diagnostic Dashboard
     </description>
     <qtgui>
       <group>
-        <label>Introspection</label>
+        <label>Miscellaneous Tools</label>
         <icon type="theme">folder</icon>
         <statustip>Plugins related to Introspection.</statustip>
       </group>

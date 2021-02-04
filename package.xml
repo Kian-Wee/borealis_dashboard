@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rqt_diagnostic_exp</name>
+  <name>borealis_dashboard</name>
   <version>0.0.0</version>
-  <description>The rqt_diagnostic_exp package</description>
+  <description>The borealis_dashboard package</description>
   <license>BSD</license>
   <maintainer email="achala_chathuranga@sutd.edu.sg">achala</maintainer>
   <author email="achala_chathuranga@sutd.edu.sg">Jane Doe</author>
@@ -10,17 +10,23 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
-   <build_depend>uwb_msgs</build_depend>
+  <build_depend>uwb_msgs</build_depend>
+  <build_depend>pose_to_path</build_depend>
+  <build_depend>borealis_uav_target_publisher</build_depend>
   <build_depend>rqt_gui</build_depend>
   <build_depend>rqt_gui_py</build_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>rqt_gui</build_export_depend>
   <build_export_depend>uwb_msgs</build_export_depend>
+  <build_export_depend>pose_to_path</build_export_depend>
+  <build_export_depend>borealis_uav_target_publisher</build_export_depend>
   <build_export_depend>rqt_gui_py</build_export_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>rqt_gui</exec_depend>
   <exec_depend>rqt_gui_py</exec_depend>
   <exec_depend>uwb_msgs</exec_depend>
+  <exec_depend>pose_to_path</exec_depend>
+  <exec_depend>borealis_uav_target_publisher</exec_depend>
 
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

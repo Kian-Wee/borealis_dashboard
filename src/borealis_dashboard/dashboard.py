@@ -58,8 +58,8 @@ class Dashboard(Plugin):
         indicators_layout = qt.QtWidgets.QHBoxLayout()
         self.control_center = ControlCenter(indicators_layout, self.start_experiment)
         self.human = Human_Diagnostic(indicators_layout, footIMU_topic="footIMU/IMU", odometry_topic="imu_odometry", odometry_service="/human_ros_launcher/odometry", fusion_service="/human_ros_launcher/fusion")
-        self.uav1 = UAV_Diagnostic(indicators_layout, left_topic='/UAV1/UAV1_left', right_topic='/UAV1/UAV1_right', odom_topic="/camera_1/odom/sample", uav_name='UAV1', uwb_service="/uav1_ros_launcher/uwb")
-        self.uav2 = UAV_Diagnostic(indicators_layout, left_topic='/UAV2/UAV2_left', right_topic='/UAV2/UAV2_right', odom_topic="/camera_2/odom/sample", uav_name='UAV2', uwb_service="/uav2_ros_launcher/uwb")
+        self.uav1 = UAV_Diagnostic(indicators_layout, left_topic='/UAV1/UAV1_left', right_topic='/UAV1/UAV1_right', odom_topic="/camera_1/odom/sample", uav_name='UAV1', uwb_service="/uav1_ros_launcher/uwb", target_topic="/uav1/target_odom")
+        self.uav2 = UAV_Diagnostic(indicators_layout, left_topic='/UAV2/UAV2_left', right_topic='/UAV2/UAV2_right', odom_topic="/camera_2/odom/sample", uav_name='UAV2', uwb_service="/uav2_ros_launcher/uwb", target_topic="/uav2/target_odom")
         # self.uav3 = UAV_Diagnostic(indicators_layout, left_topic='/UAV3/UAV3_left', right_topic='/UAV3/UAV3_right', odom_topic="/camera_3/odom/sample", uav_name='UAV3')
         
         button_layout = qt.QtWidgets.QVBoxLayout()

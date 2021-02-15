@@ -5,6 +5,7 @@ import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from uwb_msgs.msg import UUBmsg, UWBReading
 from topic_visualizer import TopicVisualize
+from odometry_visualizer import OdometryVisualizer
 from nav_msgs.msg import Odometry
 from std_srvs.srv import SetBool
 import math
@@ -12,7 +13,7 @@ import math
 class UAV_Diagnostic(QObject):
     start_record_signal = qt.QtCore.pyqtSignal(bool)
 
-    def __init__(self, layout, left_topic, right_topic, odom_topic, uav_name, uwb_service):
+    def __init__(self, layout, left_topic, right_topic, odom_topic, uav_name, uwb_service, target_topic):
         super(UAV_Diagnostic, self).__init__()
         
         # Attributes
@@ -20,6 +21,7 @@ class UAV_Diagnostic(QObject):
         self.left_topic = left_topic
         self.right_topic = right_topic
         self.odom_topic = odom_topic
+        self.target_topic = target_topic
         self.layout = layout
 
         self.uwb_started = False
@@ -44,6 +46,7 @@ class UAV_Diagnostic(QObject):
         self.uwb_left_layout = TopicVisualize(self.left_topic, UUBmsg, "UWB_Left")
         self.uwb_right_layout = TopicVisualize(self.right_topic, UUBmsg, "UWB_Right")
         self.odometry_layout = TopicVisualize(self.odom_topic, Odometry, "Odometry")
+        self.odometry_values_layout = OdometryVisualizer(self.target_topic, "Target")
         self.start_uwb_button = qt.QtWidgets.QPushButton("Start UWB")
 
         hLine1 = qt.QtWidgets.QFrame()
@@ -73,6 +76,7 @@ class UAV_Diagnostic(QObject):
         boxLayout.addWidget(hLine2)
         boxLayout.addLayout(self.odometry_layout)
         boxLayout.addWidget(hLine3)
+        boxLayout.addLayout(self.odometry_values_layout)
         boxLayout.addItem(vSpacer)
         boxLayout.addWidget(self.start_uwb_button)
 

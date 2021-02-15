@@ -1,6 +1,6 @@
 ###### ROS Bag Recording Parameters ######
 # Recorded Topics
-recorded_topics: ['UAV1/UAV1_left', 'UAV1/UAV1_right', 'UAV2/UAV2_left', 'UAV2/UAV2_right', 'footIMU/IMU', 'imu_odometry', 'camera_1/odom/sample', 'camera_2/odom/sample', 'command', 'HumanPose', 'HumanPath' 'UAV1Pose', 'UAV1Path', 'UAV2Pose', 'UAV2Path', 'borealis/command/pose', 'uav1/follow_me_target_odom', 'uav1/gun_target_odom', 'uav1/target_odom', 'uav1/odom', 'uav2/odom']
+recorded_topics: ['UAV1/UAV1_left', 'UAV1/UAV1_right', 'UAV2/UAV2_left', 'UAV2/UAV2_right', 'footIMU/IMU', 'imu_odometry', 'camera_1/odom/sample', 'camera_2/odom/sample', 'command', 'HumanPose', 'HumanPath', 'UAV1Pose', 'UAV1Path', 'UAV2Pose', 'UAV2Path', 'borealis/command/pose', 'uav1/follow_me_target_odom', 'uav1/gun_target_odom', 'uav1/target_odom', 'uav1/odom', 'uav2/odom']
 # Saved Directory
 saved_directory: "/home/achala/Bag3"
 

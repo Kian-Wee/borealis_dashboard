@@ -11,7 +11,8 @@ import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from topic_visualizer import TopicVisualize
 from std_msgs.msg import String
-
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from playsound import playsound
 
 class ControlCenter(QObject):
     
@@ -45,6 +46,7 @@ class ControlCenter(QObject):
         self.gun_command = rospy.get_param(rospy.get_name()+ '/go_cmd', 'Go')
         self.bag_topics = rospy.get_param(rospy.get_name()+ '/recorded_topics', '-a')
         self.bag_directory = rospy.get_param(rospy.get_name()+ '/saved_directory', '~')
+        gun_odom_topic = rospy.get_param(rospy.get_name()+ '/gun_odom_topic', '/borealis/command/pose')
         # Create GUI Layout
         self.layout = layout
         self.createLayout(self.layout)
@@ -60,6 +62,7 @@ class ControlCenter(QObject):
 
         # Start Publishers and Subscribers
         rospy.Subscriber(command_topic, String, self.command_callback)
+        rospy.Subscriber(gun_odom_topic, PoseWithCovarianceStamped, self.gun_odom_callback)
         self.command_pub = rospy.Publisher(command_topic, String, queue_size=100)
         
     
@@ -70,6 +73,8 @@ class ControlCenter(QObject):
         self.start_visualization_button = qt.QtWidgets.QPushButton("Start Visualization")
         self.start_target_publisher_button = qt.QtWidgets.QPushButton("Start Target Publisher")
         self.target_label = qt.QtWidgets.QLabel("")
+        self.gun_pose_desc_label = qt.QtWidgets.QLabel("GunPose [x,y]: ")
+        self.gun_pose_label = qt.QtWidgets.QLabel("")
         self.gun_target_button = qt.QtWidgets.QPushButton("Gun")
         self.follow_me_button = qt.QtWidgets.QPushButton("Follow")
         self.record_button = qt.QtWidgets.QPushButton("Record")
@@ -89,6 +94,16 @@ class ControlCenter(QObject):
         targetGroup.setLayout(target)
         targetGroup.setStyleSheet("QGroupBox {border: 0px solid black; }")
         subModules.addWidget(targetGroup)
+
+        gun_target_pose = qt.QtWidgets.QHBoxLayout()
+        self.gun_pose_desc_label.setMinimumWidth(200)
+        self.gun_pose_label.setMinimumWidth(300)
+        gun_target_pose.addWidget(self.gun_pose_desc_label)
+        gun_target_pose.addWidget(self.gun_pose_label)
+        gun_target_group = qt.QtWidgets.QGroupBox()
+        gun_target_group.setLayout(gun_target_pose)
+        gun_target_group.setStyleSheet("QGroupBox {border: 0px solid black; }")
+        subModules.addWidget(gun_target_group)
 
         subModules.addWidget(self.record_button)
 
@@ -186,7 +201,21 @@ class ControlCenter(QObject):
             self.experiment_started = False
 
     def command_callback(self, msg):
+        # play sound only when there is an update
+        if (self.target_label.text != msg.data):
+            if (msg.data == self.gun_command):
+                playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'GunMode.mp3'))
+            elif (msg.data == self.follow_me_command):
+                playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'FollowMe.mp3'))
+            else:
+                playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'Disabled.mp3'))
+                
         self.target_label.setText(msg.data)
+
+    def gun_odom_callback(self, msg):
+        pose = "%.2f,  %.2f"%(msg.pose.pose.position.x, msg.pose.pose.position.y)
+        self.gun_pose_label.setText(pose)
+
 
     def select_gun_target(self):
         self.command_pub.publish(self.gun_command)

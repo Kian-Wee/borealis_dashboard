@@ -8,6 +8,7 @@ from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
 from std_srvs.srv import SetBool
 from topic_visualizer import TopicVisualize
+from odometry_visualizer import OdometryVisualizer
 
 class Human_Diagnostic(QObject):
     footIMU_rate_signal = qt.QtCore.pyqtSignal() 
@@ -86,10 +87,21 @@ class Human_Diagnostic(QObject):
         hLine1.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
         self.odom_viz = TopicVisualize(self.odometry_topic, Odometry, "Odom")
+
+        hLine2 = qt.QtWidgets.QFrame()
+        hLine2.setFrameShape(qt.QtWidgets.QFrame.HLine)
+        hLine2.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
+
+        self.odom = OdometryVisualizer(self.odometry_topic, name="Odom")
+        
        
         boxLayout.addLayout(layout)
         boxLayout.addWidget(hLine1)
         boxLayout.addLayout(self.odom_viz)
+        boxLayout.addWidget(hLine2)
+        boxLayout.addLayout(self.odom)
+
+        
 
         # Add spacer
         vSpacer  = qt.QtWidgets.QSpacerItem(20, 40, qt.QtWidgets.QSizePolicy.Minimum, qt.QtWidgets.QSizePolicy.Expanding)

@@ -152,8 +152,8 @@ class ControlCenter(QObject):
         if self.target_publishing: self.start_target_publisher()
         if self.record: self.record_bag()
         if not(self.callback is None):
-            # End Experiment
-            self.callback(False)
+            # Start Experiment
+            self.callback(True)
 
         if self.experiment_started:
             # If an experiment is already running, rename bag file as incomplete
@@ -300,7 +300,7 @@ class ControlCenter(QObject):
 
             self.recorder = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr)
         else:
-             # Turn off visualization
+             # Turn off Recorder
             self.record_button.setStyleSheet("")
             self.record_button.setText("Start Recording")
 

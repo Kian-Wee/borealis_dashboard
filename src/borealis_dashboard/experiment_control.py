@@ -6,6 +6,7 @@ import shlex
 import sys
 import os
 import datetime
+import signal
 
 import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
@@ -29,6 +30,7 @@ class ControlCenter(QObject):
         self.path_visualizer = None
         self.target_publisher = None
         self.recorder = None
+        self.recorder_args = []
         self.callback = callback
 
         # Calculate time zone offset
@@ -266,14 +268,19 @@ class ControlCenter(QObject):
                 self.path_visualizer.terminate()
         rospy.sleep(1)
 
-    def terminate_ros_node(self, s):
-        list_cmd = subprocess.Popen("rosnode list", shell=True, stdout=subprocess.PIPE)
-        list_output = list_cmd.stdout.read()
-        retcode = list_cmd.wait()
-        assert retcode == 0, "List command returned %d" % retcode
-        for str in list_output.split("\n"):
-            if (str.startswith(s)):
-                os.system("rosnode kill " + str)
+    def terminate_ros_node(self, includes):
+        # list_cmd = subprocess.Popen("rosnode list", shell=True, stdout=subprocess.PIPE)
+        # list_output = list_cmd.stdout.read()
+        # retcode = list_cmd.wait()
+        # assert retcode == 0, "List command returned %d" % retcode
+        # for str in list_output.split("\n"):
+        #     if (str.startswith(s)):
+        #         os.system("rosnode kill " + str)
+
+        for process in psutil.process_iter():
+            if "record" in process.name() and set(includes).issubset(process.cmdline()):
+                process.send_signal(subprocess.signal.SIGINT)
+                rospy.loginfo("Process kill: pid %d"%process.pid)
 
     def record_bag(self):
         self.record = not self.record
@@ -285,8 +292,12 @@ class ControlCenter(QObject):
 
             # Start Bag Recorder
             args = ['rosbag', 'record']
+            self.recorder_args =  []
             for topic in self.bag_topics:
+                if topic[0] == '/':
+                    topic = topic[1:]
                 args.append("/" + topic)
+                self.recorder_args.append("/" + topic)
             
             timeString = datetime.datetime.utcfromtimestamp(rospy.get_time() + self.time_zone_offset).strftime('%Y-%m-%d-%H-%M-%S')
             if self.experiment_name_field.toPlainText() == "":
@@ -306,6 +317,6 @@ class ControlCenter(QObject):
 
             # Stop Bag Recorder
             if not (self.recorder is None):
-                self.terminate_ros_node("/record_")
+                self.terminate_ros_node(includes=self.recorder_args)
         rospy.sleep(1)
 

@@ -9,33 +9,55 @@ Boreolis Project Diagnostic Dashboard RQT Plugin
 * uwb_msgs (Custom Message Type)
 * pose_to_path (Fused Odometry visualization package)
 * ros_launcher (Required on client computers)
+* borealis_uav_target_publisher (Human odometry to UAV Target conversion package)
+* playsound
   
   
-**Install** <br /> 
+**Install** <br />
+>      pip install PyQt5
+>      pip install playsound
 >      catkin_make --only-pkg-with-deps borealis_dashboard
 
 **Run** <br /> 
 >      rqt --standalone borealis_dashboard
 
 #### Subscribed Topics
-- sensor_msgs/IMU : /footIMU/IMU
-- nav_msgs/Odometry : /imu_odometry
-- nav_msgs/Odometry : /camera_1/odom/sample
-- nav_msgs/Odometry : /camera_2/odom/sample
-- UUBmsg : /UAV1/UAV1_left
-- UUBmsg : /UAV1/UAV1_right
-- UUBmsg : /UAV2/UAV2_left
-- UUBmsg : /UAV2/UAV2_right
-- std_msgs/String : /command
-  
-#### Published Topics
-- std_msgs/String : /command
+These topics should be configured in the parameters.yaml file inside config folder
+
+- human_foot_imu_topic : sensor_msgs/IMU
+- human_odometry_topic : nav_msgs/Odometry
+- uav1_odometry_topic : nav_msgs/Odometry
+- uav1_target_topic : nav_msgs/Odometry
+- uav2_odometry_topic : nav_msgs/Odometry
+- uav2_target_topic : nav_msgs/Odometry
+- human_uwb_topic : UUBmsg
+- uav2_uwb_topic : UUBmsg
+- uav1_uwb_topic : UUBmsg
+- command_topic: std_msgs/String
 
 #### Service Clients
-- std_srvs/SetBool : /human_ros_launcher/odometry
-- std_srvs/SetBool : /human_ros_launcher/fusion
-- std_srvs/SetBool : /uav1_ros_launcher/uwb
-- std_srvs/SetBool : /uav2_ros_launcher/uwb
+These services should be configured in the parameters.yaml file inside config folder
+
+- human_odometry_enable_service : std_srvs/SetBool
+- human_odometry_fusion_enable_service : std_srvs/SetBool
+- human_glove_enable_service : std_srvs/SetBool
+- human_gun_enable_service : std_srvs/SetBool
+- human_hri_enable_service : std_srvs/SetBool
+- human_drone_yaw_control_enable_service : std_srvs/SetBool
+- human_uwb_enable_service : std_srvs/SetBool
+- uav1_uwb_enable_service : std_srvs/SetBool
+- uav1_datafeed_enable_service : std_srvs/SetBool
+- uav2_uwb_enable_service : std_srvs/SetBool
+- uav2_datafeed_enable_service : std_srvs/SetBool
+  
+#### Published Topics
+- command_topic: std_msgs/String
+
+#### Parameters
+- recorded_topics : String List (List of topics to be recorded)
+- saved_directory : Path (ROS Bag saving directory) 
+- follow_me_cmd : String
+- go_cmd : String
 
 ### Note
 

@@ -6,26 +6,45 @@ import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
+from uwb_msgs.msg import UUBmsg, UWBReading
 from std_srvs.srv import SetBool
 from topic_visualizer import TopicVisualize
 from odometry_visualizer import OdometryVisualizer
+from button_service import ButtonService
 
 class Human_Diagnostic(QObject):
     footIMU_rate_signal = qt.QtCore.pyqtSignal() 
     Odometry_rate_signal = qt.QtCore.pyqtSignal()
 
-    def __init__(self, layout, footIMU_topic, odometry_topic, odometry_service, fusion_service):
+    def __init__(self, layout, footIMU_topic, 
+                    odometry_topic,
+                    uwb_topic, 
+                    odometry_service, 
+                    fusion_service, 
+                    glove_service, 
+                    gun_service, 
+                    hri_service, 
+                    drone_yaw_control_service, 
+                    uwb_service):
         super(Human_Diagnostic, self).__init__()
-        
+
         # Attributes
         self.footIMU_topic = footIMU_topic
         self.odometry_topic = odometry_topic
+        self.uwb_topic = uwb_topic
         self.odometry_started = False
         self.fusion_started = False
 
+        # Create service buttons
+        self.odometry_button = ButtonService(odometry_service, "Odometry", "Human")
+        self.fusion_button = ButtonService(fusion_service, "Fusion", "Human")
+        self.glove_button = ButtonService(glove_service, "Glove", "Human")
+        self.HRI_button = ButtonService(hri_service, "HRI", "Human")
+        self.drone_yaw_ctrl_button = ButtonService(drone_yaw_control_service, "Drone Yaw Ctrl", "Human")
+        self.uwb_button = ButtonService(uwb_service, "UWB", "Human")
+
         self.layout = layout
         self.createLayout(self.layout)
-
 
         # Subscribers
         self.footIMU_rate = rostopic.ROSTopicHz(1000)
@@ -33,30 +52,9 @@ class Human_Diagnostic(QObject):
         rospy.Subscriber(self.footIMU_topic, Imu, self.footIMU_rate.callback_hz, callback_args=self.footIMU_topic)
         rospy.Subscriber(self.odometry_topic, Odometry, self.odometry_rate.callback_hz, callback_args=self.odometry_topic)
 
-        # Services
-        self.odometry_service = None
-        try:
-            rospy.wait_for_service(odometry_service, timeout=3)
-            self.odometry_service = rospy.ServiceProxy(odometry_service, SetBool)
-        except Exception as e:
-            self.start_odometry_button.setStyleSheet("QPushButton { background: red }")
-            self.start_odometry_button.setText("Odometry: Error")
-            rospy.logwarn ("Human Diagnostics : Exception:" + str(e))
-        
-        self.fusion_service = None
-        try:
-            rospy.wait_for_service(fusion_service, timeout=3)
-            self.fusion_service = rospy.ServiceProxy(fusion_service, SetBool)
-        except Exception as e:
-            self.start_fusion_button.setStyleSheet("QPushButton { background: red }")
-            self.start_fusion_button.setText("Fusion: Error")
-            rospy.logwarn ("Human Diagnostics : Exception:" + str(e))
-
         # Signal Connections
         self.footIMU_rate_signal.connect(self.showFootImuMessageRate)
         self.Odometry_rate_signal.connect(self.showOdometryMessageRate)
-        self.start_odometry_button.clicked.connect(self.start_odometry)
-        self.start_fusion_button.clicked.connect(self.start_fusion)
         
         # Start Class timer
         self.classTimer = self.ClassTimer(self.timerCallback)
@@ -76,9 +74,6 @@ class Human_Diagnostic(QObject):
         layout.addRow(footIMUDesc, self.footIMU_label)
         layout.addRow(odometryDesc, self.odometry_label)
 
-        self.start_odometry_button = qt.QtWidgets.QPushButton("Start Odometry")
-        self.start_fusion_button = qt.QtWidgets.QPushButton("Start Fusion")
-
         boxLayout = qt.QtWidgets.QVBoxLayout()
         boxLayout.addSpacing(20)
 
@@ -92,29 +87,37 @@ class Human_Diagnostic(QObject):
         hLine2.setFrameShape(qt.QtWidgets.QFrame.HLine)
         hLine2.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
+        self.uwb_viz = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
+
+        hLine3 = qt.QtWidgets.QFrame()
+        hLine3.setFrameShape(qt.QtWidgets.QFrame.HLine)
+        hLine3.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
+
         self.odom = OdometryVisualizer(self.odometry_topic, name="Odom")
-        
        
         boxLayout.addLayout(layout)
         boxLayout.addWidget(hLine1)
-        boxLayout.addLayout(self.odom_viz)
+        boxLayout.addLayout(self.uwb_viz)
         boxLayout.addWidget(hLine2)
+        boxLayout.addLayout(self.odom_viz)
+        boxLayout.addWidget(hLine3)
         boxLayout.addLayout(self.odom)
-
-        
 
         # Add spacer
         vSpacer  = qt.QtWidgets.QSpacerItem(20, 40, qt.QtWidgets.QSizePolicy.Minimum, qt.QtWidgets.QSizePolicy.Expanding)
         boxLayout.addItem(vSpacer)
 
-        boxLayout.addWidget(self.start_odometry_button)
-        boxLayout.addWidget(self.start_fusion_button)
+        boxLayout.addWidget(self.odometry_button)
+        boxLayout.addWidget(self.uwb_button)
+        boxLayout.addWidget(self.fusion_button)
+        boxLayout.addWidget(self.glove_button)
+        boxLayout.addWidget(self.HRI_button)
+        boxLayout.addWidget(self.drone_yaw_ctrl_button)
 
         group = qt.QtWidgets.QGroupBox("Human")
         group.setStyleSheet("QGroupBox { border: 1px solid black; }")
         # group.setStyleSheet("QGroupBox { border: 1px solid black; border-radius: 1px; } QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top; }")
         group.setLayout(boxLayout)
-
         layout_.addWidget(group)
 
     def deinit(self):
@@ -146,62 +149,19 @@ class Human_Diagnostic(QObject):
         
         self.odometry_label.setText(rate)
 
-    def start_odometry(self):
-        if not (self.odometry_service == None):
-            self.odometry_started = not self.odometry_started
-            resp = self.odometry_service(self.odometry_started)
-            if resp.success:
-                if self.odometry_started:
-                    # Clear meters
-                    self.odom_viz.clear()
-                    
-                    self.start_odometry_button.setStyleSheet("QPushButton { background: rgb(71, 255, 62) }")
-                    self.start_odometry_button.setText("Kill Odometry")
-                else:
-                    self.start_odometry_button.setStyleSheet("")
-                    self.start_odometry_button.setText("Start Odometry")
-            else:
-                self.start_odometry_button.setStyleSheet("QPushButton { background: red }")
-                self.start_odometry_button.setText("Odometry: Fail")
-        else:
-            self.start_odometry_button.setStyleSheet("QPushButton { background: red }")
-            self.start_odometry_button.setText("Odometry: Error")
-            rospy.logwarn("Human Diagnostics : Odometry Service Not Available")
-
-    def start_fusion(self):
-        if not (self.fusion_service == None):
-            self.fusion_started = not self.fusion_started
-            resp = self.fusion_service(self.fusion_started)
-            if resp.success:
-                if self.fusion_started:
-                    self.start_fusion_button.setStyleSheet("QPushButton { background: rgb(71, 255, 62) }")
-                    self.start_fusion_button.setText("Kill Fusion")
-                else:
-                    self.start_fusion_button.setStyleSheet("")
-                    self.start_fusion_button.setText("Start Fusion")
-            else:
-                self.start_fusion_button.setStyleSheet("QPushButton { background: red }")
-                self.start_fusion_button.setText("Fusion: Fail")
-        else:
-            self.start_fusion_button.setStyleSheet("QPushButton { background: red }")
-            self.start_fusion_button.setText("Fusion: Error")
-            rospy.logwarn("Human Diagnostics : Fusion Service Not Available")
-
     def start(self, cmd):
-        if cmd:
-            # Start Odometry and Fusion
-            # Set States to Not-Started
-            self.odometry_started = False
-            self.fusion_started = False
-        else:
-            # End Odometry and Fusion
-            self.odometry_started = True
-            self.fusion_started = True
-
         # Start / End Odometry
-        self.start_odometry()
+        self.odometry_button.call(cmd)
+        # Start / End UWB
+        self.uwb_button.call(cmd)
         # Start / End Fusion
-        self.start_fusion()
+        self.fusion_button.call(cmd)
+        # Start / End Glove
+        self.glove_button.call(cmd)
+        # Start / End HRI
+        self.HRI_button.call(cmd)
+        # Start / End Drone Yaw Control
+        self.drone_yaw_ctrl_button.call(cmd)
 
     """ 1 Hz Timer Callback
     """

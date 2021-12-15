@@ -1,6 +1,6 @@
 ###### ROS Bag Recording Parameters ######
 # Recorded Topics
-recorded_topics: ['UAV1/UAV1_left', 'UAV1/UAV1_right', 'UAV2/UAV2_left', 'UAV2/UAV2_right', 'footIMU/IMU', 'imu_odometry', 'camera_1/odom/sample', 'camera_2/odom/sample', 'command', 'HumanPose', 'HumanPath', 'UAV1Pose', 'UAV1Path', 'UAV2Pose', 'UAV2Path', 'borealis/command/pose', 'uav1/follow_me_target_odom', 'uav1/gun_target_odom', 'uav1/target_odom', 'uav1/odom', 'uav2/odom']
+recorded_topics: ['drone1_uwb', 'human_uwb', 'footIMU/IMU', 'imu_odometry', 'camera_1/odom/sample', 'camera_2/odom/sample', 'command', 'HumanPose', 'HumanPath', 'UAV1Pose', 'UAV1Path', 'UAV2Pose', 'UAV2Path', 'borealis/command/pose', 'uav1/follow_me_target_odom', 'uav1/gun_target_odom', 'uav1/target_odom', 'uav1/odom', 'uav2/odom', '/tf', '/t265/odom/sample', '/d435i/depth/image_rect_raw']
 # Saved Directory
 saved_directory: "/home/achala/Bag3"
 
@@ -12,3 +12,27 @@ command_topic: '/command'
 follow_me_cmd: 'Follow'
 go_cmd: 'Go'
 
+
+###### Human Parameters #####
+human_foot_imu_topic: /footIMU/IMU
+human_odometry_topic: /imu_odometry
+human_uwb_topic: /human/UWB
+human_odometry_enable_service: /human_ros_launcher/odometry
+human_odometry_fusion_enable_service: /human_ros_launcher/fusion
+human_glove_enable_service: /human_ros_launcher/glove
+human_gun_enable_service: /human_ros_launcher/rifle
+human_hri_enable_service: /human_ros_launcher/hri
+human_drone_yaw_control_enable_service: /human_ros_launcher/drone_yaw_control
+human_uwb_enable_service: /human_ros_launcher/uwb
+###### UAV 1 Parameters #####
+uav1_uwb_topic: /UAV1/UWB
+uav1_odometry_topic: /camera_1/odom/sample
+uav1_target_topic: /uav1/target_odom
+uav1_uwb_enable_service: /uav1_ros_launcher/uwb
+uav1_datafeed_enable_service: /uav1_ros_launcher/datafeed
+###### UAV 2 Parameters #####
+uav2_uwb_topic: /UAV2/UWB
+uav2_odometry_topic: /camera_2/odom/sample
+uav2_target_topic: /uav2/target_odom
+uav2_uwb_enable_service: /uav2_ros_launcher/uwb
+uav2_datafeed_enable_service: /uav2_ros_launcher/datafeed

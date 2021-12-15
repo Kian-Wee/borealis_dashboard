@@ -54,12 +54,63 @@ class Dashboard(Plugin):
 
         # Add widget to the user interface
         context.add_widget(self._widget)
+        print("Borealis Dashboard Loaded")
         
         indicators_layout = qt.QtWidgets.QHBoxLayout()
         self.control_center = ControlCenter(indicators_layout, self.start_experiment)
-        self.human = Human_Diagnostic(indicators_layout, footIMU_topic="footIMU/IMU", odometry_topic="imu_odometry", odometry_service="/human_ros_launcher/odometry", fusion_service="/human_ros_launcher/fusion")
-        self.uav1 = UAV_Diagnostic(indicators_layout, left_topic='/UAV1/UAV1_left', right_topic='/UAV1/UAV1_right', odom_topic="/camera_1/odom/sample", uav_name='UAV1', uwb_service="/uav1_ros_launcher/uwb", target_topic="/uav1/target_odom")
-        self.uav2 = UAV_Diagnostic(indicators_layout, left_topic='/UAV2/UAV2_left', right_topic='/UAV2/UAV2_right', odom_topic="/camera_2/odom/sample", uav_name='UAV2', uwb_service="/uav2_ros_launcher/uwb", target_topic="/uav2/target_odom")
+
+        # Get Parameters
+        self.human_foot_imu_topic = rospy.get_param(rospy.get_name()+ '/human_foot_imu_topic', '/footIMU/IMU')
+        self.human_odometry_topic = rospy.get_param(rospy.get_name()+ '/human_odometry_topic', '/imu_odometry')
+        self.human_uwb_topic = rospy.get_param(rospy.get_name()+ '/human_uwb_topic', '/human/UWB')
+        self.human_odometry_enable_service = rospy.get_param(rospy.get_name()+ '/human_odometry_enable_service', '/human_ros_launcher/odometry')
+        self.human_odometry_fusion_enable_service = rospy.get_param(rospy.get_name()+ '/human_odometry_fusion_enable_service', '/human_ros_launcher/fusion')
+        self.human_glove_enable_service = rospy.get_param(rospy.get_name()+ '/human_glove_enable_service', '/human_ros_launcher/glove')
+        self.human_gun_enable_service = rospy.get_param(rospy.get_name()+ '/human_gun_enable_service', '/human_ros_launcher/rifle')
+        self.human_hri_enable_service = rospy.get_param(rospy.get_name()+ '/human_hri_enable_service', '/human_ros_launcher/hri')
+        self.human_drone_yaw_control_enable_service = rospy.get_param(rospy.get_name()+ '/human_drone_yaw_control_enable_service', '/human_ros_launcher/drone_yaw_control')
+        self.human_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/human_uwb_enable_service', '/human_ros_launcher/uwb')
+
+        self.uav1_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav1_uwb_topic', '/UAV1/UWB')
+        self.uav1_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav1_odometry_topic', '/camera_1/odom/sample')
+        self.uav1_target_topic = rospy.get_param(rospy.get_name()+ '/uav1_target_topic', '/uav1/target_odom')
+        self.uav1_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav1_uwb_enable_service', '/uav1_ros_launcher/uwb')
+        self.uav1_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav1_datafeed_enable_service', '/uav1_ros_launcher/datafeed')
+
+        self.uav2_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav2_uwb_topic', '/UAV2/UWB')
+        self.uav2_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav2_odometry_topic', '/camera_2/odom/sample')
+        self.uav2_target_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_topic', '/uav2/target_odom')
+        self.uav2_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav2_uwb_enable_service', '/uav2_ros_launcher/uwb')
+        self.uav2_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav2_datafeed_enable_service', '/uav2_ros_launcher/datafeed')
+
+        # Create GUI Modules
+        self.human = Human_Diagnostic(indicators_layout, 
+                                        footIMU_topic=self.human_foot_imu_topic, 
+                                        odometry_topic=self.human_odometry_topic,
+                                        uwb_topic=self.human_uwb_topic, 
+                                        odometry_service=self.human_odometry_enable_service, 
+                                        fusion_service=self.human_odometry_fusion_enable_service,
+                                        glove_service=self.human_glove_enable_service,
+                                        gun_service=self.human_gun_enable_service,
+                                        hri_service=self.human_hri_enable_service,
+                                        drone_yaw_control_service=self.human_drone_yaw_control_enable_service,
+                                        uwb_service=self.human_uwb_enable_service)
+
+        self.uav1 = UAV_Diagnostic(indicators_layout, 
+                                        uwb_topic=self.uav1_uwb_topic,
+                                        odom_topic=self.uav1_odometry_topic, 
+                                        uav_name='UAV1', 
+                                        uwb_service=self.uav1_uwb_enable_service,
+                                        datafeed_service=self.uav1_datafeed_enable_service, 
+                                        target_topic=self.uav1_target_topic)
+
+        self.uav2 = UAV_Diagnostic(indicators_layout, 
+                                    uwb_topic=self.uav2_uwb_topic,
+                                    odom_topic=self.uav2_odometry_topic, 
+                                    uav_name='UAV2', 
+                                    uwb_service=self.uav2_uwb_enable_service,
+                                    datafeed_service=self.uav2_datafeed_enable_service, 
+                                    target_topic=self.uav2_target_topic)
         # self.uav3 = UAV_Diagnostic(indicators_layout, left_topic='/UAV3/UAV3_left', right_topic='/UAV3/UAV3_right', odom_topic="/camera_3/odom/sample", uav_name='UAV3')
         
         button_layout = qt.QtWidgets.QVBoxLayout()

@@ -13,7 +13,7 @@ from PyQt5.QtCore import QObject, QThread, QTimer
 from topic_visualizer import TopicVisualize
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseWithCovarianceStamped
-from playsound import playsound
+#from playsound import playsound
 
 class ControlCenter(QObject):
     
@@ -46,6 +46,7 @@ class ControlCenter(QObject):
         command_topic = rospy.get_param(rospy.get_name()+ '/command_topic', '/command')
         self.follow_me_command = rospy.get_param(rospy.get_name()+ '/follow_me_cmd', 'Follow')
         self.gun_command = rospy.get_param(rospy.get_name()+ '/go_cmd', 'Go')
+        self.human_command = rospy.get_param(rospy.get_name()+ '/human_cmd', 'Human')
         self.bag_topics = rospy.get_param(rospy.get_name()+ '/recorded_topics', '-a')
         self.bag_directory = rospy.get_param(rospy.get_name()+ '/saved_directory', '~')
         gun_odom_topic = rospy.get_param(rospy.get_name()+ '/gun_odom_topic', '/borealis/command/pose')
@@ -58,6 +59,7 @@ class ControlCenter(QObject):
         self.start_target_publisher_button.clicked.connect(self.start_target_publisher)
         self.gun_target_button.clicked.connect(self.select_gun_target)
         self.follow_me_button.clicked.connect(self.select_follow_me_target)
+        self.human_button.clicked.connect(self.select_human_target)
         self.record_button.clicked.connect(self.record_bag)
         self.start_button.clicked.connect(self.start)
         self.end_button.clicked.connect(self.end)
@@ -79,6 +81,7 @@ class ControlCenter(QObject):
         self.gun_pose_label = qt.QtWidgets.QLabel("")
         self.gun_target_button = qt.QtWidgets.QPushButton("Gun")
         self.follow_me_button = qt.QtWidgets.QPushButton("Follow")
+        self.human_button = qt.QtWidgets.QPushButton("Human")
         self.record_button = qt.QtWidgets.QPushButton("Record")
 
         subModules = qt.QtWidgets.QVBoxLayout()
@@ -92,6 +95,7 @@ class ControlCenter(QObject):
         target.addWidget(self.target_label)
         target.addWidget(self.gun_target_button)
         target.addWidget(self.follow_me_button)
+        target.addWidget(self.human_button)
         targetGroup = qt.QtWidgets.QGroupBox()
         targetGroup.setLayout(target)
         targetGroup.setStyleSheet("QGroupBox {border: 0px solid black; }")
@@ -204,13 +208,13 @@ class ControlCenter(QObject):
 
     def command_callback(self, msg):
         # play sound only when there is an update
-        if (self.target_label.text != msg.data):
-            if (msg.data == self.gun_command):
-                playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'GunMode.mp3'))
-            elif (msg.data == self.follow_me_command):
-                playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'FollowMe.mp3'))
-            else:
-                playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'Disabled.mp3'))
+        #if (self.target_label.text != msg.data):
+        #    if (msg.data == self.gun_command):
+        #        playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'GunMode.mp3'))
+        #    elif (msg.data == self.follow_me_command):
+        #        playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'FollowMe.mp3'))
+        #    else:
+        #        playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'Disabled.mp3'))
                 
         self.target_label.setText(msg.data)
 
@@ -224,6 +228,9 @@ class ControlCenter(QObject):
     
     def select_follow_me_target(self):
         self.command_pub.publish(self.follow_me_command)
+    
+    def select_human_target(self):
+        self.command_pub.publish(self.human_command)
     
     def start_target_publisher(self):
         self.target_publishing = not self.target_publishing

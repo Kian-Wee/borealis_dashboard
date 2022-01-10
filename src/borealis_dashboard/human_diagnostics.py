@@ -39,6 +39,7 @@ class Human_Diagnostic(QObject):
         self.odometry_button = ButtonService(odometry_service, "Odometry", "Human")
         self.fusion_button = ButtonService(fusion_service, "Fusion", "Human")
         self.glove_button = ButtonService(glove_service, "Glove", "Human")
+        self.gun_button = ButtonService(gun_service, "Rifle", "Human")
         self.HRI_button = ButtonService(hri_service, "HRI", "Human")
         self.drone_yaw_ctrl_button = ButtonService(drone_yaw_control_service, "Drone Yaw Ctrl", "Human")
         self.uwb_button = ButtonService(uwb_service, "UWB", "Human")
@@ -111,6 +112,7 @@ class Human_Diagnostic(QObject):
         boxLayout.addWidget(self.uwb_button)
         boxLayout.addWidget(self.fusion_button)
         boxLayout.addWidget(self.glove_button)
+        boxLayout.addWidget(self.gun_button)
         boxLayout.addWidget(self.HRI_button)
         boxLayout.addWidget(self.drone_yaw_ctrl_button)
 
@@ -158,6 +160,8 @@ class Human_Diagnostic(QObject):
         self.fusion_button.call(cmd)
         # Start / End Glove
         self.glove_button.call(cmd)
+        # Start / End Rifle
+        self.gun_button.call(cmd)
         # Start / End HRI
         self.HRI_button.call(cmd)
         # Start / End Drone Yaw Control

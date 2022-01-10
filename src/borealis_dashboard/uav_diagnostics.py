@@ -7,14 +7,17 @@ from uwb_msgs.msg import UUBmsg, UWBReading
 from topic_visualizer import TopicVisualize
 from odometry_visualizer import OdometryVisualizer
 from button_service import ButtonService
+from local_position_visualizer import PositionVisualizer
 from nav_msgs.msg import Odometry
 from std_srvs.srv import SetBool
+from uav_status_visualizer import UAVStatusVisualizer
+
 import math
 
 class UAV_Diagnostic(QObject):
     start_record_signal = qt.QtCore.pyqtSignal(bool)
 
-    def __init__(self, layout, uwb_topic, odom_topic, uav_name, uwb_service, datafeed_service, target_topic):
+    def __init__(self, layout, uwb_topic, odom_topic, uav_name, uwb_service, datafeed_service, target_topic, local_position_topic, uav_state_status_topic, uav_battery_status_topic):
         super(UAV_Diagnostic, self).__init__()
     
         # Attributes
@@ -22,6 +25,9 @@ class UAV_Diagnostic(QObject):
         self.uwb_topic = uwb_topic
         self.odom_topic = odom_topic
         self.target_topic = target_topic
+        self.local_position_topic = local_position_topic
+        self.uav_state_status_topic= uav_state_status_topic
+        self.uav_battery_status_topic= uav_battery_status_topic
         self.layout = layout
 
         self.uwb_started = False
@@ -37,6 +43,8 @@ class UAV_Diagnostic(QObject):
         self.uwb_layout = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
         self.odometry_layout = TopicVisualize(self.odom_topic, Odometry, "Odometry")
         self.odometry_values_layout = OdometryVisualizer(self.target_topic, "Target")
+        self.local_position_layout = PositionVisualizer(self.local_position_topic, "Current")
+        self.uav_status_layout = UAVStatusVisualizer(self.uav_state_status_topic,self.uav_battery_status_topic, "UAV Status")
         self.start_uwb_button = qt.QtWidgets.QPushButton("Start UWB")
 
         hLine1 = qt.QtWidgets.QFrame()
@@ -47,6 +55,10 @@ class UAV_Diagnostic(QObject):
         hLine2.setFrameShape(qt.QtWidgets.QFrame.HLine)
         hLine2.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
+        hLine3 = qt.QtWidgets.QFrame()
+        hLine3.setFrameShape(qt.QtWidgets.QFrame.HLine)
+        hLine3.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
+
         boxLayout = qt.QtWidgets.QVBoxLayout()
         boxLayout.addSpacing(20)
 
@@ -54,10 +66,19 @@ class UAV_Diagnostic(QObject):
        
         boxLayout.addLayout(self.uwb_layout)
         boxLayout.addWidget(hLine1)
+
         boxLayout.addLayout(self.odometry_layout)
         boxLayout.addWidget(hLine2)
+
         boxLayout.addLayout(self.odometry_values_layout)
+        boxLayout.addWidget(hLine3)
+
+        boxLayout.addLayout(self.local_position_layout)
+        boxLayout.addWidget(hLine3) # Use the same line
+
+        boxLayout.addLayout(self.uav_status_layout)
         boxLayout.addItem(vSpacer)
+        
         boxLayout.addWidget(self.uwb_button)
         boxLayout.addWidget(self.datafeed_button)
 

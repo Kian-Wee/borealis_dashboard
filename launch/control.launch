@@ -1,0 +1,6 @@
+<launch>	
+  <node pkg="borealis_dashboard" type="mode_broadcaster.py" name="control_panel_mode" output="screen"/>
+</launch>
+
+
+

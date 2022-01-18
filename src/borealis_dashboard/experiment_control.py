@@ -43,13 +43,13 @@ class ControlCenter(QObject):
         self.experiment_started = False
             
         # Get Parameters
-        command_topic = rospy.get_param(rospy.get_name()+ '/command_topic', '/command')
-        self.follow_me_command = rospy.get_param(rospy.get_name()+ '/follow_me_cmd', 'Follow')
-        self.gun_command = rospy.get_param(rospy.get_name()+ '/go_cmd', 'Go')
-        self.human_command = rospy.get_param(rospy.get_name()+ '/human_cmd', 'Human')
+        self.command_topic = '/command_mode_inst'
+        # self.follow_me_command = rospy.get_param(rospy.get_name()+ '/follow_me_cmd', 'Follow')
+        # self.gun_command = rospy.get_param(rospy.get_name()+ '/go_cmd', 'Go')
+        self.human_sub_topic = rospy.get_param(rospy.get_name()+ '/human_cmd', '/hri_mode')
         self.bag_topics = rospy.get_param(rospy.get_name()+ '/recorded_topics', '-a')
         self.bag_directory = rospy.get_param(rospy.get_name()+ '/saved_directory', '~')
-        gun_odom_topic = rospy.get_param(rospy.get_name()+ '/gun_odom_topic', '/borealis/command/pose')
+        self.gun_odom_topic = rospy.get_param(rospy.get_name()+ '/gun_odom_topic', '/borealis/command/pose') #TODO, ADD ONE DISPLAY FOR EACH DRONE, might not be needed since local pos already shown
         # Create GUI Layout
         self.layout = layout
         self.createLayout(self.layout)
@@ -65,9 +65,11 @@ class ControlCenter(QObject):
         self.end_button.clicked.connect(self.end)
 
         # Start Publishers and Subscribers
-        rospy.Subscriber(command_topic, String, self.command_callback)
-        rospy.Subscriber(gun_odom_topic, PoseWithCovarianceStamped, self.gun_odom_callback)
-        self.command_pub = rospy.Publisher(command_topic, String, queue_size=100)
+        rospy.Subscriber(self.human_sub_topic, String, self.command_callback)
+        self.human_command=None
+        # self.mode=None
+        rospy.Subscriber(self.gun_odom_topic, PoseWithCovarianceStamped, self.gun_odom_callback)
+        self.command_pub = rospy.Publisher(self.command_topic, String, queue_size=100)
         
     
 
@@ -81,7 +83,7 @@ class ControlCenter(QObject):
         self.gun_pose_label = qt.QtWidgets.QLabel("")
         self.gun_target_button = qt.QtWidgets.QPushButton("Gun")
         self.follow_me_button = qt.QtWidgets.QPushButton("Follow")
-        self.human_button = qt.QtWidgets.QPushButton("Human")
+        self.human_button = qt.QtWidgets.QPushButton("Borealis Man")
         self.record_button = qt.QtWidgets.QPushButton("Record")
 
         subModules = qt.QtWidgets.QVBoxLayout()
@@ -215,21 +217,23 @@ class ControlCenter(QObject):
         #        playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'FollowMe.mp3'))
         #    else:
         #        playsound(os.path.join(rospkg.RosPack().get_path('borealis_dashboard'), 'media', 'Disabled.mp3'))
-                
-        self.target_label.setText(msg.data)
+        self.human_command=msg # Copy command string to topic
+        # self.target_label.setText(msg.data)
 
     def gun_odom_callback(self, msg):
         pose = "%.2f,  %.2f"%(msg.pose.pose.position.x, msg.pose.pose.position.y)
         self.gun_pose_label.setText(pose)
 
-
     def select_gun_target(self):
-        self.command_pub.publish(self.gun_command)
+        # self.mode="Go"
+        self.command_pub.publish("Go")
     
     def select_follow_me_target(self):
-        self.command_pub.publish(self.follow_me_command)
+        # self.mode="Follow"
+        self.command_pub.publish("Follow")
     
     def select_human_target(self):
+        # self.mode="Human"
         self.command_pub.publish(self.human_command)
     
     def start_target_publisher(self):
@@ -240,7 +244,8 @@ class ControlCenter(QObject):
             self.start_target_publisher_button.setText("Stop Target Publisher")
 
             # Launch Target Publisher
-            self.target_publisher = subprocess.Popen(['roslaunch', 'borealis_uav_target_publisher', 'uav_target_publisher.launch'], stdout=sys.stdout, stderr=sys.stderr)
+            # self.target_publisher = subprocess.Popen(['roslaunch', 'borealis_uav_target_publisher', 'uav_target_publisher.launch'], stdout=sys.stdout, stderr=sys.stderr)
+            self.target_publisher = subprocess.Popen(['roslaunch', 'borealis_dashboard', 'control.launch'], stdout=sys.stdout, stderr=sys.stderr)
 
         else:
             # Turn off visualization
@@ -250,6 +255,14 @@ class ControlCenter(QObject):
             # End Visualization
             if not(self.target_publisher is None):
                 self.target_publisher.terminate()
+        
+        # #rospy.spin()
+        # if self.mode=="Human":
+        #     self.command_pub.publish(self.human_command)
+        # elif self.mode=="Go":
+        #     self.command_pub.publish("Go")
+        # elif self.mode=="Follow":
+        #     self.command_pub.publish("Follow")
         rospy.sleep(1)
 
     def start_visualization(self):

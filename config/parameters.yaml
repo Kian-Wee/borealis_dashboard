@@ -9,7 +9,7 @@ saved_directory: "/home/kw/Bag3"
 
 ###### Target Publisher Parameters  ######
 # FollowMe / Go Command Topic
-command_topic: '/command'
+command_topic: '/command_mode'
 # Commands
 follow_me_cmd: 'Follow'
 go_cmd: 'Go'

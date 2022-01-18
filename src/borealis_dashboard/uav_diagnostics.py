@@ -59,6 +59,10 @@ class UAV_Diagnostic(QObject):
         hLine3.setFrameShape(qt.QtWidgets.QFrame.HLine)
         hLine3.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
+        hLine4 = qt.QtWidgets.QFrame()
+        hLine4.setFrameShape(qt.QtWidgets.QFrame.HLine)
+        hLine4.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
+
         boxLayout = qt.QtWidgets.QVBoxLayout()
         boxLayout.addSpacing(20)
 
@@ -74,7 +78,7 @@ class UAV_Diagnostic(QObject):
         boxLayout.addWidget(hLine3)
 
         boxLayout.addLayout(self.local_position_layout)
-        boxLayout.addWidget(hLine3) # Use the same line
+        boxLayout.addWidget(hLine4)
 
         boxLayout.addLayout(self.uav_status_layout)
         boxLayout.addItem(vSpacer)

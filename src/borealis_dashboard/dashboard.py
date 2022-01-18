@@ -14,8 +14,6 @@ from uav_diagnostics import UAV_Diagnostic
 from human_diagnostics import Human_Diagnostic
 from experiment_control import ControlCenter
 
-# TODO, ADD IN FLIGHT MODE SWITCH FOR DIFFERENT DRONES, FINISH BATTERY AND FLIGHT MODE VISUALISER
-
 class Dashboard(Plugin):
 
     def __init__(self, context):

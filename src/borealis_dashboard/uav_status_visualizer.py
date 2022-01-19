@@ -48,18 +48,20 @@ class UAVStatusVisualizer(QFormLayout):
         self.odomY_label.setText("")
         
     def state_callback(self, msg):
-        print(msg)
         y = msg.mode
         self.flightmode_signal.emit(y)
 
     def battery_callback(self, msg):
         x = msg.cell_voltage # Array of battery voltages
-        battery=sum(x)/len(x)
-        batterymin=3.2
-        batterymax=4.2
-        batterylevel= (battery-batterymin)/(batterymax-batterymin)
-        x=batterylevel
-        self.battery_signal.emit(x)
+        if len(x)==0:
+            self.battery_signal.emit(x)
+        else:
+            battery=sum(x)/len(x)
+            batterymin=3.2
+            batterymax=4.2
+            batterylevel= (battery-batterymin)/(batterymax-batterymin)
+            x=batterylevel
+            self.battery_signal.emit(x)
 
     
     def showmodeStatus(self, y):

@@ -54,7 +54,7 @@ class UAVStatusVisualizer(QFormLayout):
     def battery_callback(self, msg):
         x = msg.cell_voltage # Array of battery voltages
         if len(x)==0:
-            self.battery_signal.emit(x)
+            self.battery_signal.emit(0)
         else:
             battery=sum(x)/len(x)
             batterymin=3.2

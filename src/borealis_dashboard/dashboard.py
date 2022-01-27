@@ -72,18 +72,9 @@ class Dashboard(Plugin):
         self.human_drone_yaw_control_enable_service = rospy.get_param(rospy.get_name()+ '/human_drone_yaw_control_enable_service', '/human_ros_launcher/drone_yaw_control')
         self.human_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/human_uwb_enable_service', '/human_ros_launcher/uwb')
 
-        self.uav0_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav0_uwb_topic', '/UAV0/UWB')
-        self.uav0_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav0_odometry_topic', '/camera_0/odom/sample')
-        self.uav0_target_topic = rospy.get_param(rospy.get_name()+ '/uav0_target_topic', '/borealis_command_yaw')
-        self.uav0_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav0_uwb_enable_service', '/uav0_ros_launcher/uwb')
-        self.uav0_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav0_datafeed_enable_service', '/uav0_ros_launcher/datafeed')
-        self.uav0_local_position_topic = rospy.get_param(rospy.get_name()+ '/uav0/mavros/local_position/pose', '/uav0/mavros/local_position/odom') # Local position as given by mavros
-        self.uav0_uav_state_status_topic = rospy.get_param(rospy.get_name()+ '/uav0/mavros/state', '/uav0/mavros/state') # For Flight Modes
-        self.uav0_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav0/mavros/battery', '/uav0/mavros/battery') # For Battery
-
         self.uav1_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav1_uwb_topic', '/UAV1/UWB')
         self.uav1_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav1_odometry_topic', '/camera_1/odom/sample')
-        self.uav1_target_topic = rospy.get_param(rospy.get_name()+ '/uav1_target_topic', '/uav1/target_odom')
+        self.uav1_target_topic = rospy.get_param(rospy.get_name()+ '/uav1_target_topic', '/uav1/command/pose')
         self.uav1_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav1_uwb_enable_service', '/uav1_ros_launcher/uwb')
         self.uav1_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav1_datafeed_enable_service', '/uav1_ros_launcher/datafeed')
         self.uav1_local_position_topic = rospy.get_param(rospy.get_name()+ '/uav1/mavros/local_position/pose', '/uav1/mavros/local_position/odom') # Local position as given by mavros
@@ -92,12 +83,21 @@ class Dashboard(Plugin):
 
         self.uav2_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav2_uwb_topic', '/UAV2/UWB')
         self.uav2_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav2_odometry_topic', '/camera_2/odom/sample')
-        self.uav2_target_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_topic', '/uav2/target_odom')
+        self.uav2_target_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_topic', '/uav2/command/pose')
         self.uav2_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav2_uwb_enable_service', '/uav2_ros_launcher/uwb')
         self.uav2_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav2_datafeed_enable_service', '/uav2_ros_launcher/datafeed')
         self.uav2_local_position_topic = rospy.get_param(rospy.get_name()+ '/uav2/mavros/local_position/pose', '/uav2/mavros/local_position/odom') # Local position as given by mavros
         self.uav2_uav_state_status_topic = rospy.get_param(rospy.get_name()+ '/uav2/mavros/state', '/uav2/mavros/state') # For Flight Modes
         self.uav2_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav2/mavros/battery', '/uav2/mavros/battery') # For Battery
+
+        self.uav3_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav3_uwb_topic', '/UAV3/UWB')
+        self.uav3_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav3_odometry_topic', '/camera_3/odom/sample')
+        self.uav3_target_topic = rospy.get_param(rospy.get_name()+ '/uav3_target_topic', 'uav3/command/pose')
+        self.uav3_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav3_uwb_enable_service', '/uav3_ros_launcher/uwb')
+        self.uav3_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav3_datafeed_enable_service', '/uav3_ros_launcher/datafeed')
+        self.uav3_local_position_topic = rospy.get_param(rospy.get_name()+ '/uav3/mavros/local_position/pose', '/uav3/mavros/local_position/odom') # Local position as given by mavros
+        self.uav3_uav_state_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/mavros/state', '/uav3/mavros/state') # For Flight Modes
+        self.uav3_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/mavros/battery', '/uav3/mavros/battery') # For Battery
 
         # Create GUI Modules
         self.human = Human_Diagnostic(indicators_layout, 
@@ -112,27 +112,16 @@ class Dashboard(Plugin):
                                         drone_yaw_control_service=self.human_drone_yaw_control_enable_service,
                                         uwb_service=self.human_uwb_enable_service)
 
-        self.uav0 = UAV_Diagnostic(indicators_layout, 
-                                        uwb_topic=self.uav0_uwb_topic,
-                                        odom_topic=self.uav0_odometry_topic, 
-                                        uav_name='UAV0', 
-                                        uwb_service=self.uav0_uwb_enable_service,
-                                        datafeed_service=self.uav0_datafeed_enable_service, 
-                                        target_topic=self.uav0_target_topic,
-                                        local_position_topic=self.uav0_local_position_topic,
-                                        uav_state_status_topic=self.uav0_uav_state_status_topic,
-                                        uav_battery_status_topic=self.uav0_uav_battery_status_topic)
-
         self.uav1 = UAV_Diagnostic(indicators_layout, 
-                                        uwb_topic=self.uav1_uwb_topic,
-                                        odom_topic=self.uav1_odometry_topic, 
-                                        uav_name='UAV1', 
-                                        uwb_service=self.uav1_uwb_enable_service,
-                                        datafeed_service=self.uav1_datafeed_enable_service, 
-                                        target_topic=self.uav1_target_topic,
-                                        local_position_topic=self.uav1_local_position_topic,
-                                        uav_state_status_topic=self.uav1_uav_state_status_topic,
-                                        uav_battery_status_topic=self.uav1_uav_battery_status_topic)
+                                    uwb_topic=self.uav1_uwb_topic,
+                                    odom_topic=self.uav1_odometry_topic, 
+                                    uav_name='UAV1', 
+                                    uwb_service=self.uav1_uwb_enable_service,
+                                    datafeed_service=self.uav1_datafeed_enable_service, 
+                                    target_topic=self.uav1_target_topic,
+                                    local_position_topic=self.uav1_local_position_topic,
+                                    uav_state_status_topic=self.uav1_uav_state_status_topic,
+                                    uav_battery_status_topic=self.uav1_uav_battery_status_topic)
 
         self.uav2 = UAV_Diagnostic(indicators_layout, 
                                     uwb_topic=self.uav2_uwb_topic,
@@ -144,6 +133,17 @@ class Dashboard(Plugin):
                                     local_position_topic=self.uav2_local_position_topic,
                                     uav_state_status_topic=self.uav2_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav2_uav_battery_status_topic)
+
+        self.uav3 = UAV_Diagnostic(indicators_layout, 
+                                    uwb_topic=self.uav3_uwb_topic,
+                                    odom_topic=self.uav3_odometry_topic, 
+                                    uav_name='UAV3', 
+                                    uwb_service=self.uav3_uwb_enable_service,
+                                    datafeed_service=self.uav3_datafeed_enable_service, 
+                                    target_topic=self.uav3_target_topic,
+                                    local_position_topic=self.uav3_local_position_topic,
+                                    uav_state_status_topic=self.uav3_uav_state_status_topic,
+                                    uav_battery_status_topic=self.uav3_uav_battery_status_topic)
         
         button_layout = qt.QtWidgets.QVBoxLayout()
         exit_button = qt.QtWidgets.QPushButton("Exit")
@@ -173,9 +173,9 @@ class Dashboard(Plugin):
         self.human.start(cmd)
         # No need to restart UWB each time experiment starts. Hence ignore experiment stop commands.
         if cmd:
-            self.uav0.start(cmd)
             self.uav1.start(cmd)
             self.uav2.start(cmd)
+            self.uav3.start(cmd)
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here

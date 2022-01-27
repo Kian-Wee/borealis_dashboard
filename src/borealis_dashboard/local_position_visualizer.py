@@ -6,6 +6,7 @@ from PyQt5.QtCore import QObject, QThread, QTimer
 from PyQt5.QtWidgets import QFormLayout
 import math
 from nav_msgs.msg import Odometry
+import tf
 
 class PositionVisualizer(QFormLayout):
     odometry_signal = qt.QtCore.pyqtSignal(float, float, float, float) # x, y, z, theta
@@ -56,8 +57,14 @@ class PositionVisualizer(QFormLayout):
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
-        theta = msg.pose.pose.orientation.w * 180 / math.pi
-        self.odometry_signal.emit(x, y, z, theta)
+        quaternion = (
+            msg.pose.pose.orientation.x,
+            msg.pose.pose.orientation.y,
+            msg.pose.pose.orientation.z,
+            msg.pose.pose.orientation.w)
+        euler = tf.transformations.euler_from_quaternion(quaternion)
+        yaw = math.degrees(euler[2])
+        self.odometry_signal.emit(x, y, z, yaw)
     
     def showOdometry(self, x, y, z, theta):
         self.odomX_label.setText("%.2f"%x)

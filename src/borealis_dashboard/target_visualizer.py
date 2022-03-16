@@ -10,14 +10,16 @@ import math
 from nav_msgs.msg import Odometry
 
 
-class OdometryVisualizer(QFormLayout):
+class TargetVisualizer(QFormLayout):
     odometry_signal = qt.QtCore.pyqtSignal(float, float, float) # x, y
+    yaw_signal = qt.QtCore.pyqtSignal(float)
 
-    def __init__(self, topic, name=None):
-        super(OdometryVisualizer, self).__init__()
+    def __init__(self, topic, yaw_topic, name=None):
+        super(TargetVisualizer, self).__init__()
         
         # Attributes
         self.topic = topic
+        self.yaw_topic = yaw_topic
         if name is None:
             name = topic
 
@@ -25,8 +27,10 @@ class OdometryVisualizer(QFormLayout):
 
         # Subscribers
         rospy.Subscriber(self.topic, Odometry, self.callback)
+        rospy.Subscriber(self.yaw_topic, Odometry, self.yaw_callback)
         
         self.odometry_signal.connect(self.showOdometry)
+        self.yaw_signal.connect(self.showYaw)
 
 
     def createLayout(self, name):
@@ -59,20 +63,23 @@ class OdometryVisualizer(QFormLayout):
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
+        self.odometry_signal.emit(x, y, z)
+
+    def yaw_callback(self, msg):
         quaternion = (
             msg.pose.pose.orientation.x,
             msg.pose.pose.orientation.y,
             msg.pose.pose.orientation.z,
             msg.pose.pose.orientation.w)
         euler = tf.transformations.euler_from_quaternion(quaternion)
-        roll = euler[0]
-        pitch = euler[1]
         yaw = euler[2]
-        # theta = msg.pose.pose.orientation.z * 180 / math.pi
-        self.odometry_signal.emit(x, y, z, yaw)
+        self.yaw_signal.emit(yaw)
     
-    def showOdometry(self, x, y, z, theta):
+    def showOdometry(self, x, y, z):
         self.odomX_label.setText("%.2f"%x)
         self.odomY_label.setText("%.2f"%y)
         self.odomY_label.setText("%.2f"%z)
+        # self.odomTheta_label.setText("%.2f"%theta)
+
+    def showYaw(self, theta):
         self.odomTheta_label.setText("%.2f"%theta)

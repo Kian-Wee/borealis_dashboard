@@ -9,7 +9,7 @@ from nav_msgs.msg import Odometry
 from uwb_msgs.msg import UUBmsg, UWBReading
 from std_srvs.srv import SetBool
 from topic_visualizer import TopicVisualize
-from odometry_visualizer import OdometryVisualizer
+from local_position_visualizer import PositionVisualizer
 from button_service import ButtonService
 
 class Human_Diagnostic(QObject):
@@ -94,7 +94,7 @@ class Human_Diagnostic(QObject):
         hLine3.setFrameShape(qt.QtWidgets.QFrame.HLine)
         hLine3.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
-        self.odom = OdometryVisualizer(self.odometry_topic, name="Odom")
+        self.odom = PositionVisualizer(self.odometry_topic, name="Odom")
        
         boxLayout.addLayout(layout)
         boxLayout.addWidget(hLine1)

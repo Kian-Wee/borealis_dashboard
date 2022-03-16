@@ -1,6 +1,8 @@
-# Boreolis Experiment Dashboard
+# Borealis Experiment Dashboard
 
-Boreolis Project Diagnostic Dashboard RQT Plugin
+Borealis Project Diagnostic Dashboard RQT Plugin
+
+Install script for dependencies available(setup.bash), ensure the workspace used is borealis_ws for successful automatic install
 
 ## Dependencies
 * ROS
@@ -13,12 +15,14 @@ Boreolis Project Diagnostic Dashboard RQT Plugin
 * playsound
   
   
+
 **Install** <br />
+
 >      pip install PyQt5
->      pip install playsound
 >      catkin_make --only-pkg-with-deps borealis_dashboard
 
 **Run** <br /> 
+
 >      rqt --standalone borealis_dashboard
 
 #### Subscribed Topics

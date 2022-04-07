@@ -1,7 +1,7 @@
 <library path="src">
   <class name="Dashboard" type="borealis_dashboard.dashboard.Dashboard" base_class_type="rqt_gui_py::Plugin">
     <description>
-      Boreolis Project Experiment Diagnostic Dashboard
+      Borealis Project Experiment Diagnostic Dashboard
     </description>
     <qtgui>
       <group>
@@ -9,9 +9,9 @@
         <icon type="theme">folder</icon>
         <statustip>Plugins related to Introspection.</statustip>
       </group>
-      <label>Boreolis Dashboard</label>
+      <label>Borealis Dashboard</label>
       <icon type="theme">applications-other</icon>
-      <statustip>Boreolis Project Experiment Diagnostic Dashboard</statustip>
+      <statustip>Borealis Project Experiment Diagnostic Dashboard</statustip>
     </qtgui>
   </class>
 </library>

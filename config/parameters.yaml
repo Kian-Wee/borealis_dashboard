@@ -28,19 +28,19 @@ human_drone_yaw_control_enable_service: /human_ros_launcher/drone_yaw_control
 human_uwb_enable_service: /human_ros_launcher/uwb
 ###### UAV 1 Parameters #####
 uav1_uwb_topic: /UAV1Pose
-uav1_odometry_topic: /uav1/t265/pose
+uav1_odometry_topic: /uav1/t265/odom/sample
 uav1_target_topic: /uav1/command/pose
 uav1_uwb_enable_service: /uav1_ros_launcher/uwb
 uav1_datafeed_enable_service: /uav1_ros_launcher/datafeed
 ###### UAV 2 Parameters #####
 uav2_uwb_topic: /UAV2Pose
-uav2_odometry_topic: /uav2/t265/pose
+uav2_odometry_topic: /uav2/t265/odom/sample
 uav2_target_topic: /uav2/command/pose
 uav2_uwb_enable_service: /uav2_ros_launcher/uwb
 uav2_datafeed_enable_service: /uav2_ros_launcher/datafeed
 ###### UAV 3 Parameters #####
 uav3_uwb_topic: /UAV3Pose
-uav3_odometry_topic: /uav3/t265/pose
+uav3_odometry_topic: /uav3/t265/odom/sample
 uav3_target_topic: /uav3/command/pose
 uav3_uwb_enable_service: /uav3_ros_launcher/uwb
 uav3_datafeed_enable_service: /uav3_ros_launcher/datafeed

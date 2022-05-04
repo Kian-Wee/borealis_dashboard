@@ -1,6 +1,7 @@
 ###### ROS Bag Recording Parameters ######
 # Recorded Topics
-recorded_topics: ['drone1_uwb', 'drone2_uwb', 'human_uwb', 'footIMU/IMU', 'imu_odometry', 't265/odom/sample', 'command', 'HumanPose', 'HumanPath', 'UAV1Pose', 'UAV1Path', 'UAV2Pose', 'UAV2Path', 'borealis/command/pose', 'uav1/follow_me_target_odom', 'uav1/gun_target_odom', 'uav1/target_odom', 'uav1/odom', 'uav2/odom', '/tf']
+recorded_topics: []
+# 'drone1_uwb', 'drone2_uwb', 'human_uwb', 'footIMU/IMU', 'imu_odometry', 't265/odom/sample', 'command', 'HumanPose', 'HumanPath', 'UAV1Pose', 'UAV1Path', 'UAV2Pose', 'UAV2Path', 'borealis/command/pose', 'uav1/follow_me_target_odom', 'uav1/gun_target_odom', 'uav1/target_odom', 'uav1/odom', 'uav2/odom', '/tf'
 #, '/d435i/depth/image_rect_raw'
 
 # Saved Directory

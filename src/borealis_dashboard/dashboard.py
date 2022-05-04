@@ -19,6 +19,9 @@ from experiment_control import ControlCenter
 class Dashboard(Plugin):
 
     def __init__(self, context):
+
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
+
         super(Dashboard, self).__init__(context)
         # Give QObjects reasonable names
         self.setObjectName('Dashboard')

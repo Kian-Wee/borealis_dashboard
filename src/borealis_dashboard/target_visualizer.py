@@ -8,6 +8,8 @@ from PyQt5.QtCore import QObject, QThread, QTimer
 from PyQt5.QtWidgets import QFormLayout
 import math
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Float64
 
 
 class TargetVisualizer(QFormLayout):
@@ -26,11 +28,15 @@ class TargetVisualizer(QFormLayout):
         self.createLayout(name)
 
         # Subscribers
-        rospy.Subscriber(self.topic, Odometry, self.callback)
-        rospy.Subscriber(self.yaw_topic, Odometry, self.yaw_callback)
+        self.rate = rostopic.ROSTopicHz(2)
+        # rospy.Subscriber(self.topic, Odometry, self.rate.callback_hz, self.callback)
+        rospy.Subscriber(self.topic, PoseStamped, self.callback)
+        rospy.Subscriber(self.yaw_topic, Float64, self.yaw_callback)
         
         self.odometry_signal.connect(self.showOdometry)
         self.yaw_signal.connect(self.showYaw)
+
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
 
 
     def createLayout(self, name):
@@ -60,25 +66,32 @@ class TargetVisualizer(QFormLayout):
         self.odomTheta_label.setText("")
         
     def callback(self, msg):
-        x = msg.pose.pose.position.x
-        y = msg.pose.pose.position.y
-        z = msg.pose.pose.position.z
+        # # if str(msg_type) == "nav_msgs/Odometry":
+        x = msg.pose.position.x
+        y = msg.pose.position.y
+        z = msg.pose.position.z
+        # rospy.loginfo(x)
+        # if str(msg_type) == "geometry_msg/PoseStamped":
+        # x = msg.pose.position.x
+        # y = msg.pose.position.y
+        # z = msg.pose.position.z
         self.odometry_signal.emit(x, y, z)
 
     def yaw_callback(self, msg):
-        quaternion = (
-            msg.pose.pose.orientation.x,
-            msg.pose.pose.orientation.y,
-            msg.pose.pose.orientation.z,
-            msg.pose.pose.orientation.w)
-        euler = tf.transformations.euler_from_quaternion(quaternion)
-        yaw = euler[2]
+        # quaternion = (
+        #     msg.pose.orientation.x,
+        #     msg.pose.orientation.y,
+        #     msg.pose.orientation.z,
+        #     msg.pose.orientation.w)
+        # euler = tf.transformations.euler_from_quaternion(quaternion)
+        # yaw = euler[2]
+        yaw=msg.data
         self.yaw_signal.emit(yaw)
     
     def showOdometry(self, x, y, z):
         self.odomX_label.setText("%.2f"%x)
         self.odomY_label.setText("%.2f"%y)
-        self.odomY_label.setText("%.2f"%z)
+        self.odomZ_label.setText("%.2f"%z)
         # self.odomTheta_label.setText("%.2f"%theta)
 
     def showYaw(self, theta):

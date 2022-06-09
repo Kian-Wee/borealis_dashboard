@@ -14,6 +14,8 @@ from topic_visualizer import TopicVisualize
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseWithCovarianceStamped
 #from playsound import playsound
+from distance_between import DistanceBetween
+from distance_between_posestamped import DistanceBetweenPoseStamped
 
 class ControlCenter(QObject):
     
@@ -43,7 +45,8 @@ class ControlCenter(QObject):
         self.experiment_started = False
             
         # Get Parameters
-        self.command_topic = '/command_mode_inst'
+        # self.command_topic = '/command_mode_inst'
+        self.command_topic = '/hri_mode'
         # self.follow_me_command = rospy.get_param(rospy.get_name()+ '/follow_me_cmd', 'Follow')
         # self.gun_command = rospy.get_param(rospy.get_name()+ '/go_cmd', 'Go')
         self.human_sub_topic = rospy.get_param(rospy.get_name()+ '/human_cmd', '/hri_mode')
@@ -59,7 +62,6 @@ class ControlCenter(QObject):
         self.start_target_publisher_button.clicked.connect(self.start_target_publisher)
         self.gun_target_button.clicked.connect(self.select_gun_target)
         self.follow_me_button.clicked.connect(self.select_follow_me_target)
-        self.human_button.clicked.connect(self.select_human_target)
         self.record_button.clicked.connect(self.record_bag)
         self.start_button.clicked.connect(self.start)
         self.end_button.clicked.connect(self.end)
@@ -70,6 +72,8 @@ class ControlCenter(QObject):
         # self.mode=None
         rospy.Subscriber(self.gun_odom_topic, PoseWithCovarianceStamped, self.gun_odom_callback)
         self.command_pub = rospy.Publisher(self.command_topic, String, queue_size=100)
+
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
         
     
 
@@ -83,7 +87,6 @@ class ControlCenter(QObject):
         self.gun_pose_label = qt.QtWidgets.QLabel("")
         self.gun_target_button = qt.QtWidgets.QPushButton("Gun")
         self.follow_me_button = qt.QtWidgets.QPushButton("Follow")
-        self.human_button = qt.QtWidgets.QPushButton("Borealis Man")
         self.record_button = qt.QtWidgets.QPushButton("Record")
 
         subModules = qt.QtWidgets.QVBoxLayout()
@@ -97,7 +100,6 @@ class ControlCenter(QObject):
         target.addWidget(self.target_label)
         target.addWidget(self.gun_target_button)
         target.addWidget(self.follow_me_button)
-        target.addWidget(self.human_button)
         targetGroup = qt.QtWidgets.QGroupBox()
         targetGroup.setLayout(target)
         targetGroup.setStyleSheet("QGroupBox {border: 0px solid black; }")
@@ -121,6 +123,17 @@ class ControlCenter(QObject):
         # group.setStyleSheet("QGroupBox { border: 1px solid black; border-radius: 1px; } QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top; }")
         subGroup.setLayout(subModules)
 
+        ###### Distance between Modules ######
+        distanceModule = qt.QtWidgets.QVBoxLayout()
+        distanceModule.addSpacing(10)
+        distanceModule.addLayout(DistanceBetween("/UAV1PoseUWB", "/UAV2PoseUWB", "UAV1/UAV2", 1.5))
+        distanceModule.addLayout(DistanceBetween("/UAV1PoseUWB", "/HumanPose", "UAV1/Human[UWB]", 1.5))
+        distanceModule.addLayout(DistanceBetween("/UAV2PoseUWB", "/HumanPose", "UAV2/Human[UWB]", 1.5))
+        distanceModule.addLayout(DistanceBetweenPoseStamped("/uav1/mavros/local_position/pose", "/HumanPose", "UAV1/Human", 1.5))
+        distanceModule.addLayout(DistanceBetweenPoseStamped("/uav2/mavros/local_position/pose", "/HumanPose", "UAV2/Human", 1.5))
+        distanceGroup = qt.QtWidgets.QGroupBox("Distance Values")
+        distanceGroup.setStyleSheet("QGroupBox { border: 1px solid black; }")
+        distanceGroup.setLayout(distanceModule)
 
         ###### Main Modules ######
         self.start_button = qt.QtWidgets.QPushButton("Start Experiment")
@@ -140,6 +153,7 @@ class ControlCenter(QObject):
         vLayout = qt.QtWidgets.QVBoxLayout()
         vLayout.addSpacing(20)
         vLayout.addWidget(subGroup)
+        vLayout.addWidget(distanceGroup)
         vLayout.addWidget(mainGroup)
         group = qt.QtWidgets.QGroupBox("Experiment Control")
         group.setStyleSheet("QGroupBox { border: 1px solid black; }")
@@ -226,11 +240,13 @@ class ControlCenter(QObject):
 
     def select_gun_target(self):
         # self.mode="Go"
-        self.command_pub.publish("Go")
+        print("Switching to Go There")
+        self.command_pub.publish("Go_There")
     
     def select_follow_me_target(self):
         # self.mode="Follow"
-        self.command_pub.publish("Follow")
+        print("Switching to Follow Me")
+        self.command_pub.publish("Follow_Me")
     
     def select_human_target(self):
         # self.mode="Human"

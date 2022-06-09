@@ -20,8 +20,6 @@ class Dashboard(Plugin):
 
     def __init__(self, context):
 
-        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
-
         super(Dashboard, self).__init__(context)
         # Give QObjects reasonable names
         self.setObjectName('Dashboard')
@@ -68,7 +66,8 @@ class Dashboard(Plugin):
         # Where rospy.get_param('default_param to pull from', 'default_topic')
         self.human_foot_imu_topic = rospy.get_param(rospy.get_name()+ '/human_foot_imu_topic', '/footIMU/IMU')
         self.human_odometry_topic = rospy.get_param(rospy.get_name()+ '/human_odometry_topic', '/imu_odometry')
-        self.human_uwb_topic = rospy.get_param(rospy.get_name()+ '/human_uwb_topic', '/human/UWB')
+        # self.human_uwb_topic = rospy.get_param(rospy.get_name()+ '/human_uwb_topic', '/HumanPose')
+        self.human_uwb_topic = '/HumanPose'
         self.human_odometry_enable_service = rospy.get_param(rospy.get_name()+ '/human_odometry_enable_service', '/human_ros_launcher/odometry')
         self.human_odometry_fusion_enable_service = rospy.get_param(rospy.get_name()+ '/human_odometry_fusion_enable_service', '/human_ros_launcher/fusion')
         self.human_glove_enable_service = rospy.get_param(rospy.get_name()+ '/human_glove_enable_service', '/human_ros_launcher/glove')
@@ -79,7 +78,7 @@ class Dashboard(Plugin):
 
         self.uav1_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav1_uwb_topic', '/UAV1/UWB')
         self.uav1_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav1_odometry_topic', '/camera_1/odom/sample')
-        self.uav1_target_topic = rospy.get_param(rospy.get_name()+ '/uav1_target_topic', '/uav1/command/pose')
+        self.uav1_target_topic = rospy.get_param(rospy.get_name()+ '/uav1_target_topic', '/uav1/mavros/setpoint_position/local') # '/uav1/command/pose'
         self.uav1_target_yaw_topic = rospy.get_param(rospy.get_name()+ '/uav1_target_yaw_topic', '/uav1/command/yaw')
         self.uav1_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav1_uwb_enable_service', '/uav1_ros_launcher/uwb')
         self.uav1_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav1_datafeed_enable_service', '/uav1_ros_launcher/datafeed')
@@ -90,7 +89,7 @@ class Dashboard(Plugin):
 
         self.uav2_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav2_uwb_topic', '/UAV2/UWB')
         self.uav2_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav2_odometry_topic', '/camera_2/odom/sample')
-        self.uav2_target_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_topic', '/uav2/command/pose')
+        self.uav2_target_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_topic', '/uav2/mavros/setpoint_position/local')
         self.uav2_target_yaw_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_yaw_topic', '/uav2/command/yaw')
         self.uav2_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav2_uwb_enable_service', '/uav2_ros_launcher/uwb')
         self.uav2_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav2_datafeed_enable_service', '/uav2_ros_launcher/datafeed')
@@ -101,7 +100,7 @@ class Dashboard(Plugin):
 
         self.uav3_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav3_uwb_topic', '/UAV3/UWB')
         self.uav3_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav3_odometry_topic', '/camera_3/odom/sample')
-        self.uav3_target_topic = rospy.get_param(rospy.get_name()+ '/uav3_target_topic', 'uav3/command/pose')
+        self.uav3_target_topic = rospy.get_param(rospy.get_name()+ '/uav3_target_topic', '/uav3/mavros/setpoint_position/local')
         self.uav3_target_yaw_topic = rospy.get_param(rospy.get_name()+ '/uav3_target_yaw_topic', '/uav3/command/yaw')
         self.uav3_uwb_enable_service = rospy.get_param(rospy.get_name()+ '/uav3_uwb_enable_service', '/uav3_ros_launcher/uwb')
         self.uav3_datafeed_enable_service = rospy.get_param(rospy.get_name()+ '/uav3_datafeed_enable_service', '/uav3_ros_launcher/datafeed')
@@ -131,7 +130,7 @@ class Dashboard(Plugin):
                                     datafeed_service=self.uav1_datafeed_enable_service, 
                                     target_topic=self.uav1_target_topic,
                                     target_yaw_topic=self.uav1_target_yaw_topic,
-                                    local_position_topic=self.uav1_local_position_topic,
+                                    local_position_topic=self.uav1_local_position_topic, uwb_position_topic="/UAV1PoseUWB",
                                     uav_state_status_topic=self.uav1_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav1_uav_battery_status_topic,
                                     uav_mode_topic=self.uav1_uav_mode_topic)
@@ -144,7 +143,7 @@ class Dashboard(Plugin):
                                     datafeed_service=self.uav2_datafeed_enable_service, 
                                     target_topic=self.uav2_target_topic,
                                     target_yaw_topic=self.uav2_target_yaw_topic,
-                                    local_position_topic=self.uav2_local_position_topic,
+                                    local_position_topic=self.uav2_local_position_topic, uwb_position_topic="/UAV2PoseUWB",
                                     uav_state_status_topic=self.uav2_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav2_uav_battery_status_topic,
                                     uav_mode_topic=self.uav2_uav_mode_topic)
@@ -157,7 +156,7 @@ class Dashboard(Plugin):
                                     datafeed_service=self.uav3_datafeed_enable_service, 
                                     target_topic=self.uav3_target_topic,
                                     target_yaw_topic=self.uav3_target_yaw_topic,
-                                    local_position_topic=self.uav3_local_position_topic,
+                                    local_position_topic=self.uav3_local_position_topic, uwb_position_topic='/UAV3PoseUWB',
                                     uav_state_status_topic=self.uav3_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav3_uav_battery_status_topic,
                                     uav_mode_topic=self.uav3_uav_mode_topic)
@@ -176,6 +175,8 @@ class Dashboard(Plugin):
         dashboard_layout.addLayout(button_layout)
 
         self._widget.setLayout(dashboard_layout)
+
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
     
     def load_parameters(self, file_name):
         try:

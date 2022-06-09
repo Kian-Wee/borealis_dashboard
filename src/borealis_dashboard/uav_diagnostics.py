@@ -11,14 +11,13 @@ from local_position_visualizer import PositionVisualizer
 from nav_msgs.msg import Odometry
 from std_srvs.srv import SetBool
 from uav_status_visualizer import UAVStatusVisualizer
-
-import math
+from local_position_visualizer_posewithcovariancestamped import PositionVisualizerStamped
 
 class UAV_Diagnostic(QObject):
     start_record_signal = qt.QtCore.pyqtSignal(bool)
 
     def __init__(self, layout, uwb_topic, odom_topic, uav_name, uwb_service, 
-                    datafeed_service, target_topic, target_yaw_topic, local_position_topic, uav_state_status_topic, 
+                    datafeed_service, target_topic, target_yaw_topic, local_position_topic, uwb_position_topic, uav_state_status_topic, 
                     uav_battery_status_topic, uav_mode_topic):
         super(UAV_Diagnostic, self).__init__()
     
@@ -29,6 +28,7 @@ class UAV_Diagnostic(QObject):
         self.target_topic = target_topic
         self.target_yaw_topic = target_yaw_topic
         self.local_position_topic = local_position_topic
+        self.uwb_position_topic = uwb_position_topic
         self.uav_state_status_topic= uav_state_status_topic
         self.uav_battery_status_topic= uav_battery_status_topic
         self.uav_mode_topic= uav_mode_topic
@@ -43,11 +43,15 @@ class UAV_Diagnostic(QObject):
         # self.createLayout(self.layout, self.uav_name)
         self.createInterface()
 
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
+
     def createInterface(self):
         self.uwb_layout = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
         self.odometry_layout = TopicVisualize(self.odom_topic, Odometry, "Odometry")
         self.odometry_values_layout = TargetVisualizer(self.target_topic,self.target_yaw_topic, "Target")
+        # self.odometry_values_layout = PositionVisualizer(self.target_topic, "Target")
         self.local_position_layout = PositionVisualizer(self.local_position_topic, "Current")
+        self.uwb_position_layout = PositionVisualizer(self.uwb_position_topic, "UWB(Current)")
         self.uav_status_layout = UAVStatusVisualizer(self.uav_state_status_topic, self.uav_battery_status_topic, self.uav_mode_topic, "UAV Status")
         self.start_uwb_button = qt.QtWidgets.QPushButton("Start UWB")
 
@@ -83,6 +87,9 @@ class UAV_Diagnostic(QObject):
 
         boxLayout.addLayout(self.local_position_layout)
         boxLayout.addWidget(hLine4)
+
+        boxLayout.addLayout(self.uwb_position_layout)
+        boxLayout.addWidget(hLine4)        
 
         boxLayout.addLayout(self.uav_status_layout)
         boxLayout.addItem(vSpacer)

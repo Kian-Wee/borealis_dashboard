@@ -29,7 +29,7 @@ class TopicVisualize(QFormLayout):
         self.createLayout(name)
 
         # Subscribers
-        self.rate = rostopic.ROSTopicHz(250)
+        self.rate = rostopic.ROSTopicHz(2)
         rospy.Subscriber(self.topic, self.msg_type, self.rate.callback_hz, callback_args=self.topic)
         rospy.Subscriber(self.topic, self.msg_type, self.callback)
 
@@ -90,7 +90,7 @@ class TopicVisualize(QFormLayout):
         self.total_msg_count = 0
         
         # Create new message rate counter
-        self.rate = rostopic.ROSTopicHz(250)
+        self.rate = rostopic.ROSTopicHz(2)
         rospy.Subscriber(self.topic, self.msg_type, self.rate.callback_hz, callback_args=self.topic)
 
         self.rate_label.setStyleSheet("")

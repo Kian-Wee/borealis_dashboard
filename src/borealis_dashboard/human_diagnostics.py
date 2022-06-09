@@ -48,8 +48,8 @@ class Human_Diagnostic(QObject):
         self.createLayout(self.layout)
 
         # Subscribers
-        self.footIMU_rate = rostopic.ROSTopicHz(1000)
-        self.odometry_rate = rostopic.ROSTopicHz(1000)
+        self.footIMU_rate = rostopic.ROSTopicHz(2)
+        self.odometry_rate = rostopic.ROSTopicHz(2)
         rospy.Subscriber(self.footIMU_topic, Imu, self.footIMU_rate.callback_hz, callback_args=self.footIMU_topic)
         rospy.Subscriber(self.odometry_topic, Odometry, self.odometry_rate.callback_hz, callback_args=self.odometry_topic)
 
@@ -60,6 +60,8 @@ class Human_Diagnostic(QObject):
         # Start Class timer
         self.classTimer = self.ClassTimer(self.timerCallback)
         self.classTimer.start()
+
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
 
     def createLayout(self, layout_):
         layout = qt.QtWidgets.QFormLayout()

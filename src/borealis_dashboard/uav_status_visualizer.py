@@ -33,6 +33,8 @@ class UAVStatusVisualizer(QFormLayout):
         self.battery_signal.connect(self.showbatteryStatus)
         self.mode_signal.connect(self.showmodeStatus)
 
+        rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
+
 
     def createLayout(self, name):
         WidgetDesc = qt.QtWidgets.QLabel(name)

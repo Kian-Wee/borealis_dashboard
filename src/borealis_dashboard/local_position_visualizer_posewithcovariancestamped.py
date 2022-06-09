@@ -5,14 +5,14 @@ import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from PyQt5.QtWidgets import QFormLayout
 import math
-from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseWithCovarianceStamped
 import tf
 
-class PositionVisualizer(QFormLayout):
+class PositionVisualizerStamped(QFormLayout):
     odometry_signal = qt.QtCore.pyqtSignal(float, float, float, float) # x, y, z, theta
 
     def __init__(self, topic, name=None):
-        super(PositionVisualizer, self).__init__()
+        super(PositionVisualizerStamped, self).__init__()
         
         # Attributes
         self.topic = topic
@@ -23,7 +23,7 @@ class PositionVisualizer(QFormLayout):
 
         # Subscribers
         # self.rate = rostopic.ROSTopicHz(2)
-        rospy.Subscriber(self.topic, Odometry, self.callback)
+        rospy.Subscriber(self.topic, PoseWithCovarianceStamped, self.callback)
         
         self.odometry_signal.connect(self.showOdometry)
 

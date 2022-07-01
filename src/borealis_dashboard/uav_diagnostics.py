@@ -18,7 +18,7 @@ class UAV_Diagnostic(QObject):
 
     def __init__(self, layout, uwb_topic, odom_topic, uav_name, uwb_service, 
                     datafeed_service, target_topic, target_yaw_topic, local_position_topic, uwb_position_topic, uav_state_status_topic, 
-                    uav_battery_status_topic, uav_mode_topic):
+                    uav_battery_status_topic, uav_mode_topic, planner_status_topic):
         super(UAV_Diagnostic, self).__init__()
     
         # Attributes
@@ -32,6 +32,7 @@ class UAV_Diagnostic(QObject):
         self.uav_state_status_topic= uav_state_status_topic
         self.uav_battery_status_topic= uav_battery_status_topic
         self.uav_mode_topic= uav_mode_topic
+        self.planner_status_topic= planner_status_topic
         self.layout = layout
 
         self.uwb_started = False
@@ -52,7 +53,7 @@ class UAV_Diagnostic(QObject):
         # self.odometry_values_layout = PositionVisualizer(self.target_topic, "Target")
         self.local_position_layout = PositionVisualizer(self.local_position_topic, "Current")
         self.uwb_position_layout = PositionVisualizer(self.uwb_position_topic, "UWB(Current)")
-        self.uav_status_layout = UAVStatusVisualizer(self.uav_state_status_topic, self.uav_battery_status_topic, self.uav_mode_topic, "UAV Status")
+        self.uav_status_layout = UAVStatusVisualizer(self.uav_state_status_topic, self.uav_battery_status_topic, self.uav_mode_topic,self.planner_status_topic, "UAV Status")
         self.start_uwb_button = qt.QtWidgets.QPushButton("Start UWB")
 
         hLine1 = qt.QtWidgets.QFrame()

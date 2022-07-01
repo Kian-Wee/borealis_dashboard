@@ -86,6 +86,7 @@ class Dashboard(Plugin):
         self.uav1_uav_state_status_topic = rospy.get_param(rospy.get_name()+ '/uav1/mavros/state', '/uav1/mavros/state') # For Flight Modes
         self.uav1_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav1/mavros/battery', '/uav1/mavros/battery') # For Battery
         self.uav1_uav_mode_topic = rospy.get_param(rospy.get_name()+ '/uav1/hri_mode', '/uav1/hri_mode') # For Follow, Go
+        self.uav1_planner_status_topic = rospy.get_param(rospy.get_name()+ '/uav1/planner_status', '/uav1/planner_status')
 
         self.uav2_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav2_uwb_topic', '/UAV2/UWB')
         self.uav2_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav2_odometry_topic', '/camera_2/odom/sample')
@@ -97,6 +98,7 @@ class Dashboard(Plugin):
         self.uav2_uav_state_status_topic = rospy.get_param(rospy.get_name()+ '/uav2/mavros/state', '/uav2/mavros/state') # For Flight Modes
         self.uav2_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav2/mavros/battery', '/uav2/mavros/battery') # For Battery
         self.uav2_uav_mode_topic = rospy.get_param(rospy.get_name()+ '/uav2/hri_mode', '/uav2/hri_mode') # For Follow, Go
+        self.uav2_planner_status_topic = rospy.get_param(rospy.get_name()+ '/uav2/planner_status', '/uav2/planner_status')
 
         self.uav3_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav3_uwb_topic', '/UAV3/UWB')
         self.uav3_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav3_odometry_topic', '/camera_3/odom/sample')
@@ -108,6 +110,7 @@ class Dashboard(Plugin):
         self.uav3_uav_state_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/mavros/state', '/uav3/mavros/state') # For Flight Modes
         self.uav3_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/mavros/battery', '/uav3/mavros/battery') # For Battery
         self.uav3_uav_mode_topic = rospy.get_param(rospy.get_name()+ '/uav3/hri_mode', '/uav3/hri_mode') # For Follow, Go
+        self.uav3_planner_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/planner_status', '/uav3/planner_status')
 
         # Create GUI Modules
         self.human = Human_Diagnostic(indicators_layout, 
@@ -133,7 +136,8 @@ class Dashboard(Plugin):
                                     local_position_topic=self.uav1_local_position_topic, uwb_position_topic="/UAV1PoseUWB",
                                     uav_state_status_topic=self.uav1_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav1_uav_battery_status_topic,
-                                    uav_mode_topic=self.uav1_uav_mode_topic)
+                                    uav_mode_topic=self.uav1_uav_mode_topic,
+                                    planner_status_topic= self.uav1_planner_status_topic)
 
         self.uav2 = UAV_Diagnostic(indicators_layout, 
                                     uwb_topic=self.uav2_uwb_topic,
@@ -146,7 +150,8 @@ class Dashboard(Plugin):
                                     local_position_topic=self.uav2_local_position_topic, uwb_position_topic="/UAV2PoseUWB",
                                     uav_state_status_topic=self.uav2_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav2_uav_battery_status_topic,
-                                    uav_mode_topic=self.uav2_uav_mode_topic)
+                                    uav_mode_topic=self.uav2_uav_mode_topic,
+                                    planner_status_topic= self.uav2_planner_status_topic)
 
         self.uav3 = UAV_Diagnostic(indicators_layout, 
                                     uwb_topic=self.uav3_uwb_topic,
@@ -159,7 +164,8 @@ class Dashboard(Plugin):
                                     local_position_topic=self.uav3_local_position_topic, uwb_position_topic='/UAV3PoseUWB',
                                     uav_state_status_topic=self.uav3_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav3_uav_battery_status_topic,
-                                    uav_mode_topic=self.uav3_uav_mode_topic)
+                                    uav_mode_topic=self.uav3_uav_mode_topic,
+                                    planner_status_topic= self.uav3_planner_status_topic)
         
         button_layout = qt.QtWidgets.QVBoxLayout()
         exit_button = qt.QtWidgets.QPushButton("Exit")

@@ -12,15 +12,17 @@ from std_msgs.msg import String
 class UAVStatusVisualizer(QFormLayout):
     flightmode_signal = qt.QtCore.pyqtSignal(str) #flight mode
     battery_signal = qt.QtCore.pyqtSignal(float) #Battery level
-    mode_signal = qt.QtCore.pyqtSignal(float) #Battery level
+    mode_signal = qt.QtCore.pyqtSignal(str)
+    planner_signal = qt.QtCore.pyqtSignal(str)
 
-    def __init__(self, state_topic, battery_topic, mode_topic, name="UAV Status"):
+    def __init__(self, state_topic, battery_topic, mode_topic, planner_topic, name="UAV Status"):
         super(UAVStatusVisualizer, self).__init__()
         
         # Attributes
         self.state_topic = state_topic
         self.battery_topic = battery_topic
         self.mode_topic = mode_topic
+        self.planner_topic = planner_topic
 
         self.createLayout(name)
 
@@ -28,10 +30,12 @@ class UAVStatusVisualizer(QFormLayout):
         rospy.Subscriber(self.state_topic, State, self.state_callback)
         rospy.Subscriber(self.battery_topic, BatteryState, self.battery_callback)
         rospy.Subscriber(self.mode_topic, String, self.mode_callback)
+        rospy.Subscriber(self.planner_topic, String, self.planner_callback)
         
         self.flightmode_signal.connect(self.showflightmodeStatus)
         self.battery_signal.connect(self.showbatteryStatus)
         self.mode_signal.connect(self.showmodeStatus)
+        self.planner_signal.connect(self.showplannerStatus)
 
         rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
 
@@ -41,14 +45,17 @@ class UAVStatusVisualizer(QFormLayout):
         BatteryDesc = qt.QtWidgets.QLabel("    Battery Level:")
         FlightModeDesc = qt.QtWidgets.QLabel("    Flight Mode:")
         ModeDesc = qt.QtWidgets.QLabel("    Mode:")
+        PlannerDesc = qt.QtWidgets.QLabel("    Planner:")
         self.Battery_label = qt.QtWidgets.QLabel("")
         self.FlightMode_label = qt.QtWidgets.QLabel("")
         self.Mode_label = qt.QtWidgets.QLabel("")
+        self.Planner_label = qt.QtWidgets.QLabel("")
 
         self.addRow(WidgetDesc, qt.QtWidgets.QLabel(""))
         self.addRow(BatteryDesc, self.Battery_label)
         self.addRow(FlightModeDesc, self.FlightMode_label)
         self.addRow(ModeDesc, self.Mode_label)
+        self.addRow(PlannerDesc, self.Planner_label)
 
     def deinit(self):
         pass
@@ -75,6 +82,9 @@ class UAVStatusVisualizer(QFormLayout):
 
     def mode_callback(self, msg):
         self.mode_signal.emit(msg.data)
+
+    def planner_callback(self, msg):
+        self.planner_signal.emit(msg.data)
     
     def showflightmodeStatus(self, data):
         self.FlightMode_label.setText(data)
@@ -84,3 +94,6 @@ class UAVStatusVisualizer(QFormLayout):
 
     def showmodeStatus(self, data):
         self.Mode_label.setText(data)
+
+    def showplannerStatus(self, data):
+        self.Planner_label.setText(data)

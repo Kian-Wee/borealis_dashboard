@@ -10,18 +10,17 @@ import math
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
-
+from tf.transformations import euler_from_quaternion
 
 class TargetVisualizer(QFormLayout):
     odometry_signal = qt.QtCore.pyqtSignal(float, float, float) # x, y
     yaw_signal = qt.QtCore.pyqtSignal(float)
 
-    def __init__(self, topic, yaw_topic, name=None):
+    def __init__(self, topic, name=None):
         super(TargetVisualizer, self).__init__()
         
         # Attributes
         self.topic = topic
-        self.yaw_topic = yaw_topic
         if name is None:
             name = topic
 
@@ -31,7 +30,6 @@ class TargetVisualizer(QFormLayout):
         self.rate = rostopic.ROSTopicHz(2)
         # rospy.Subscriber(self.topic, Odometry, self.rate.callback_hz, self.callback)
         rospy.Subscriber(self.topic, PoseStamped, self.callback)
-        rospy.Subscriber(self.yaw_topic, Float64, self.yaw_callback)
         
         self.odometry_signal.connect(self.showOdometry)
         self.yaw_signal.connect(self.showYaw)
@@ -76,17 +74,8 @@ class TargetVisualizer(QFormLayout):
         # y = msg.pose.position.y
         # z = msg.pose.position.z
         self.odometry_signal.emit(x, y, z)
-
-    def yaw_callback(self, msg):
-        # quaternion = (
-        #     msg.pose.orientation.x,
-        #     msg.pose.orientation.y,
-        #     msg.pose.orientation.z,
-        #     msg.pose.orientation.w)
-        # euler = tf.transformations.euler_from_quaternion(quaternion)
-        # yaw = euler[2]
-        yaw=msg.data
-        self.yaw_signal.emit(yaw)
+        theta=euler_from_quaternion([msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.pose.orientation.w])[2]
+        self.yaw_signal.emit(theta)
     
     def showOdometry(self, x, y, z):
         self.odomX_label.setText("%.2f"%x)

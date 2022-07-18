@@ -17,7 +17,7 @@ class UAV_Diagnostic(QObject):
     start_record_signal = qt.QtCore.pyqtSignal(bool)
 
     def __init__(self, layout, uwb_topic, odom_topic, uav_name, uwb_service, 
-                    datafeed_service, target_topic, target_yaw_topic, local_position_topic, uwb_position_topic, uav_state_status_topic, 
+                    datafeed_service, target_topic, local_position_topic, uwb_position_topic, uav_state_status_topic, 
                     uav_battery_status_topic, uav_mode_topic, planner_status_topic):
         super(UAV_Diagnostic, self).__init__()
     
@@ -26,7 +26,6 @@ class UAV_Diagnostic(QObject):
         self.uwb_topic = uwb_topic
         self.odom_topic = odom_topic
         self.target_topic = target_topic
-        self.target_yaw_topic = target_yaw_topic
         self.local_position_topic = local_position_topic
         self.uwb_position_topic = uwb_position_topic
         self.uav_state_status_topic= uav_state_status_topic
@@ -49,7 +48,7 @@ class UAV_Diagnostic(QObject):
     def createInterface(self):
         self.uwb_layout = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
         self.odometry_layout = TopicVisualize(self.odom_topic, Odometry, "Odometry")
-        self.odometry_values_layout = TargetVisualizer(self.target_topic,self.target_yaw_topic, "Target")
+        self.odometry_values_layout = TargetVisualizer(self.target_topic, "Target")
         # self.odometry_values_layout = PositionVisualizer(self.target_topic, "Target")
         self.local_position_layout = PositionVisualizer(self.local_position_topic, "Current")
         self.uwb_position_layout = PositionVisualizer(self.uwb_position_topic, "UWB(Current)")

@@ -69,16 +69,20 @@ class UAVStatusVisualizer(QFormLayout):
         self.flightmode_signal.emit(msg.mode)
 
     def battery_callback(self, msg):
+        batterymin=3.2
+        batterymax=4.2
+        numcells=6 # number of cells in drone
         x = msg.cell_voltage # Array of battery voltages
         if len(x)==0:
             self.battery_signal.emit(0)
+        elif len(x)==1: # in newer versions of px4, instead of giving a list of single cell voltages it gives the raw voltage
+            battery=x[0]
+            batterylevel= (battery-batterymin*numcells)/(batterymax-batterymin)/numcells
+            self.battery_signal.emit(batterylevel)
         else:
             battery=sum(x)/len(x)
-            batterymin=3.2
-            batterymax=4.2
             batterylevel= (battery-batterymin)/(batterymax-batterymin)
-            x=batterylevel
-            self.battery_signal.emit(x)
+            self.battery_signal.emit(batterylevel)
 
     def mode_callback(self, msg):
         self.mode_signal.emit(msg.data)

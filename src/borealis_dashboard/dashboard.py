@@ -88,6 +88,9 @@ class Dashboard(Plugin):
         self.uav1_uav_mode_topic = rospy.get_param(rospy.get_name()+ '/uav1/hri_mode', '/uav1/hri_mode') # For Follow, Go
         self.uav1_planner_status_topic = rospy.get_param(rospy.get_name()+ '/uav1/planner_status', '/uav1/planner_status')
 
+        self.uav1_teaming_planner_rf_phasesync_topic = "/uav1/borealis_teaming_planner/phase_and_time_rf"
+        self.uav1_teaming_planner_cp_status_topic = "/uav1/borealis_teaming_planner/phase_and_time_cp"
+
         self.uav2_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav2_uwb_topic', '/UAV2/UWB')
         self.uav2_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav2_odometry_topic', '/camera_2/odom/sample')
         self.uav2_target_topic = rospy.get_param(rospy.get_name()+ '/uav2_target_topic', '/uav2/mavros/setpoint_position/local')
@@ -100,6 +103,10 @@ class Dashboard(Plugin):
         self.uav2_uav_mode_topic = rospy.get_param(rospy.get_name()+ '/uav2/hri_mode', '/uav2/hri_mode') # For Follow, Go
         self.uav2_planner_status_topic = rospy.get_param(rospy.get_name()+ '/uav2/planner_status', '/uav2/planner_status')
 
+        self.uav2_teaming_planner_rf_phasesync_topic = "/uav2/borealis_teaming_planner/phase_and_time_rf"
+        self.uav2_teaming_planner_cp_status_topic = "/uav2/borealis_teaming_planner/phase_and_time_cp"
+
+
         self.uav3_uwb_topic = rospy.get_param(rospy.get_name()+ '/uav3_uwb_topic', '/UAV3/UWB')
         self.uav3_odometry_topic = rospy.get_param(rospy.get_name()+ '/uav3_odometry_topic', '/camera_3/odom/sample')
         self.uav3_target_topic = rospy.get_param(rospy.get_name()+ '/uav3_target_topic', '/uav3/mavros/setpoint_position/local')
@@ -111,6 +118,10 @@ class Dashboard(Plugin):
         self.uav3_uav_battery_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/mavros/battery', '/uav3/mavros/battery') # For Battery
         self.uav3_uav_mode_topic = rospy.get_param(rospy.get_name()+ '/uav3/hri_mode', '/uav3/hri_mode') # For Follow, Go
         self.uav3_planner_status_topic = rospy.get_param(rospy.get_name()+ '/uav3/planner_status', '/uav3/planner_status')
+
+        self.uav3_teaming_planner_rf_phasesync_topic = "/uav3/borealis_teaming_planner/phase_and_time_rf"
+        self.uav3_teaming_planner_cp_status_topic = "/uav3/borealis_teaming_planner/phase_and_time_cp"
+        self.ping_server = "192.168.1.3"
 
         # Create GUI Modules
         self.human = Human_Diagnostic(indicators_layout, 
@@ -136,7 +147,12 @@ class Dashboard(Plugin):
                                     uav_state_status_topic=self.uav1_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav1_uav_battery_status_topic,
                                     uav_mode_topic=self.uav1_uav_mode_topic,
-                                    planner_status_topic= self.uav1_planner_status_topic)
+                                    planner_status_topic= self.uav1_planner_status_topic,
+
+                                    teaming_planner_rf_phasesync_topic = self.uav1_teaming_planner_rf_phasesync_topic,
+                                    teaming_planner_cp_status_topic = self.uav1_teaming_planner_cp_status_topic,
+                                    ping_server = self.ping_server
+                                    )
 
         self.uav2 = UAV_Diagnostic(indicators_layout, 
                                     uwb_topic=self.uav2_uwb_topic,
@@ -149,7 +165,13 @@ class Dashboard(Plugin):
                                     uav_state_status_topic=self.uav2_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav2_uav_battery_status_topic,
                                     uav_mode_topic=self.uav2_uav_mode_topic,
-                                    planner_status_topic= self.uav2_planner_status_topic)
+                                    planner_status_topic= self.uav2_planner_status_topic,
+
+                                    teaming_planner_rf_phasesync_topic = self.uav2_teaming_planner_rf_phasesync_topic,
+                                    teaming_planner_cp_status_topic = self.uav2_teaming_planner_cp_status_topic,
+                                    ping_server = self.ping_server
+                                    )
+
 
         self.uav3 = UAV_Diagnostic(indicators_layout, 
                                     uwb_topic=self.uav3_uwb_topic,
@@ -162,7 +184,13 @@ class Dashboard(Plugin):
                                     uav_state_status_topic=self.uav3_uav_state_status_topic,
                                     uav_battery_status_topic=self.uav3_uav_battery_status_topic,
                                     uav_mode_topic=self.uav3_uav_mode_topic,
-                                    planner_status_topic= self.uav3_planner_status_topic)
+                                    planner_status_topic= self.uav3_planner_status_topic,
+
+                                    teaming_planner_rf_phasesync_topic = self.uav3_teaming_planner_rf_phasesync_topic,
+                                    teaming_planner_cp_status_topic = self.uav3_teaming_planner_cp_status_topic,
+                                    ping_server = self.ping_server
+                                    )
+
         
         button_layout = qt.QtWidgets.QVBoxLayout()
         exit_button = qt.QtWidgets.QPushButton("Exit")

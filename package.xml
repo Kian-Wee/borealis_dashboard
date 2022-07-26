@@ -15,18 +15,23 @@
   <build_depend>borealis_uav_target_publisher</build_depend>
   <build_depend>rqt_gui</build_depend>
   <build_depend>rqt_gui_py</build_depend>
+  <build_depend>mt_msgs</build_depend>
+
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>rqt_gui</build_export_depend>
   <build_export_depend>uwb_msgs</build_export_depend>
   <build_export_depend>pose_to_path</build_export_depend>
   <build_export_depend>borealis_uav_target_publisher</build_export_depend>
   <build_export_depend>rqt_gui_py</build_export_depend>
+  <build_export_depend>mt_msgs</build_export_depend>
+
   <exec_depend>rospy</exec_depend>
   <exec_depend>rqt_gui</exec_depend>
   <exec_depend>rqt_gui_py</exec_depend>
   <exec_depend>uwb_msgs</exec_depend>
   <exec_depend>pose_to_path</exec_depend>
   <exec_depend>borealis_uav_target_publisher</exec_depend>
+  <exec_depend>mt_msgs</exec_depend>
 
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

@@ -1,0 +1,4 @@
+Header header
+uint64 sourceSegmentId
+geometry_msgs/Point position
+float64 headingRad

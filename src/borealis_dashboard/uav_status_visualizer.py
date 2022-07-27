@@ -148,17 +148,17 @@ class UAVStatusVisualizer(QFormLayout):
         self.PlannerCPDesc_label.setText(data)
 
     def ping_timer_callback(self):
-        out = ping(self.ping_server, verbose=False, count=1, size=36, timeout=8)
+        out = ping(self.ping_server, verbose=False, count=1, size=36, timeout=6)
 
         time_out_flag = "Request timed out"
         if re.findall(str(out), time_out_flag): # if output has the sentence Reques timed out ..
             print("Ping time out!")
+            self.PingDesc_label.setText("Time out! >6s")
         else:
             out = str(out).split('/') # the avg substring in the output string
             avg = out[3]
             print("Ping is {}".format(str(avg)))
-
-        self.PingDesc_label.setText(str(avg))
+            self.PingDesc_label.setText(str(avg))
         pass
 
 class PingTimerThread(QThread):

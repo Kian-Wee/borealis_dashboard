@@ -121,7 +121,10 @@ class Dashboard(Plugin):
 
         self.uav3_teaming_planner_rf_phasesync_topic = "/uav3/borealis_teaming_planner/phase_and_time_rf"
         self.uav3_teaming_planner_cp_status_topic = "/uav3/borealis_teaming_planner/phase_and_time_cp"
-        self.ping_server = "192.168.1.3"
+        self.uav1_ping_server = "192.168.1.62"
+        self.uav2_ping_server = "192.168.1.63"
+        self.uav3_ping_server = "192.168.1.64"
+
 
         # Create GUI Modules
         self.human = Human_Diagnostic(indicators_layout, 
@@ -151,7 +154,7 @@ class Dashboard(Plugin):
 
                                     teaming_planner_rf_phasesync_topic = self.uav1_teaming_planner_rf_phasesync_topic,
                                     teaming_planner_cp_status_topic = self.uav1_teaming_planner_cp_status_topic,
-                                    ping_server = self.ping_server
+                                    ping_server = self.uav1_ping_server
                                     )
 
         self.uav2 = UAV_Diagnostic(indicators_layout, 
@@ -169,7 +172,7 @@ class Dashboard(Plugin):
 
                                     teaming_planner_rf_phasesync_topic = self.uav2_teaming_planner_rf_phasesync_topic,
                                     teaming_planner_cp_status_topic = self.uav2_teaming_planner_cp_status_topic,
-                                    ping_server = self.ping_server
+                                    ping_server = self.uav2_ping_server
                                     )
 
 
@@ -188,7 +191,7 @@ class Dashboard(Plugin):
 
                                     teaming_planner_rf_phasesync_topic = self.uav3_teaming_planner_rf_phasesync_topic,
                                     teaming_planner_cp_status_topic = self.uav3_teaming_planner_cp_status_topic,
-                                    ping_server = self.ping_server
+                                    ping_server = self.uav3_ping_server
                                     )
 
         

@@ -1,7 +1,7 @@
 import os
 
 def myping(host):
-    response = os.popen("ping -c 1 " + host).read()
+    response = os.popen("ping -c 4 " + host).read()
     response_split = response.split()
     idx = 0 
     for string in response_split:
@@ -14,5 +14,5 @@ def myping(host):
             # the avg value
             print(min_avg_max_mdev_split[2])
         idx += 1
-        
+
 out = myping("192.168.1.64")

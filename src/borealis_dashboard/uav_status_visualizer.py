@@ -17,7 +17,7 @@ class PingTimerThread(QThread):
     def __init__(self, callback):
         QThread.__init__(self)
         self.timer = QTimer()
-        self.timer.setInterval(int(1000)) # in ms
+        self.timer.setInterval(int(3000)) # in ms
         self.timer.timeout.connect(callback) # run the callback every 1s
         self.timer.start()
         
@@ -180,7 +180,7 @@ class UAVStatusVisualizer(QFormLayout):
         self.PingDesc_label.setText(out_text)
 
     def myping(self, host):
-        response = os.popen("ping -c 1 " + host).read()
+        response = os.popen("ping -c 4 " + host).read()
         response_split = response.split()
         idx = 0 
         for string in response_split:

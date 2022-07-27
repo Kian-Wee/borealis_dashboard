@@ -124,8 +124,6 @@ class Dashboard(Plugin):
         self.uav1_ping_server = "192.168.1.62"
         self.uav2_ping_server = "192.168.1.63"
         self.uav3_ping_server = "192.168.1.64"
-        print("temp")
-
 
         # Create GUI Modules
         self.human = Human_Diagnostic(indicators_layout, 

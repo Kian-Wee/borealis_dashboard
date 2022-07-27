@@ -10,7 +10,7 @@ from sensor_msgs.msg import BatteryState
 from std_msgs.msg import String
 
 from mt_msgs.msg import phaseAndTime
-from pythonping import ping 
+# from pythonping import ping 
 import re
 
 class UAVStatusVisualizer(QFormLayout):
@@ -19,8 +19,8 @@ class UAVStatusVisualizer(QFormLayout):
     mode_signal = qt.QtCore.pyqtSignal(str)
     planner_signal = qt.QtCore.pyqtSignal(str)
 
-    teaming_planner_rf_signal = qt.QtCore.pyqtSignal(str) # phaseAndTime.phase is actually u_int8 but whatever 
-    teaming_planner_cp_signal = qt.QtCore.pyqtSignal(str)
+    teaming_planner_rf_signal = qt.QtCore.pyqtSignal(int) # phaseAndTime.phase is actually u_int8 but whatever 
+    teaming_planner_cp_signal = qt.QtCore.pyqtSignal(int)
 
 
     def __init__(self, state_topic, battery_topic, mode_topic, planner_topic, teaming_planner_rf_phasesync_topic, teaming_planner_cp_status_topic, ping_server, name="UAV Status"):
@@ -37,8 +37,8 @@ class UAVStatusVisualizer(QFormLayout):
         self.ping_server = ping_server # server to ping to, kian wee lapotop '192.168.1.3'
 
         # Start Ping Timer thread, ping might be a blocking function so a seperate thread is used
-        self.ping_timer_thread = self.PingTimerThread(self.ping_timer_callback)
-        self.ping_timer_thread.start()
+        # self.ping_timer_thread = self.PingTimerThread(self.ping_timer_callback)
+        # self.ping_timer_thread.start()
 
         self.createLayout(name)
 
@@ -55,6 +55,8 @@ class UAVStatusVisualizer(QFormLayout):
         self.battery_signal.connect(self.showbatteryStatus)
         self.mode_signal.connect(self.showmodeStatus)
         self.planner_signal.connect(self.showplannerStatus)
+        self.teaming_planner_rf_signal.connect(self.showTeamingPlannerRFStatus)
+        self.teaming_planner_cp_signal.connect(self.showTeamingPlannerCPStatus)
 
         rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
 
@@ -65,15 +67,19 @@ class UAVStatusVisualizer(QFormLayout):
         FlightModeDesc = qt.QtWidgets.QLabel("    Flight Mode:")
         ModeDesc = qt.QtWidgets.QLabel("    Mode:")
         PlannerDesc = qt.QtWidgets.QLabel("    Planner:")
-
-        PlannerRFDesc = qt.QtWidgets.QLabel("    Robot Formation Phase:")
-        PlannerCPDesc = qt.QtWidgets.QLabel("    Consensus Path Phase:")
+        PDesc = qt.QtWidgets.QLabel("Planner Phase")
+        PlannerRFDesc = qt.QtWidgets.QLabel("    Robot Formation:")
+        PlannerCPDesc = qt.QtWidgets.QLabel("    Consensus Path:")
         PingDesc = qt.QtWidgets.QLabel("    Ping:")
 
         self.Battery_label = qt.QtWidgets.QLabel("")
         self.FlightMode_label = qt.QtWidgets.QLabel("")
         self.Mode_label = qt.QtWidgets.QLabel("")
         self.Planner_label = qt.QtWidgets.QLabel("")
+
+        hLine1 = qt.QtWidgets.QFrame()
+        hLine1.setFrameShape(qt.QtWidgets.QFrame.HLine)
+        hLine1.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
         self.PlannerRFDesc_label = qt.QtWidgets.QLabel("")
         self.PlannerCPDesc_label = qt.QtWidgets.QLabel("")
@@ -85,10 +91,11 @@ class UAVStatusVisualizer(QFormLayout):
         self.addRow(ModeDesc, self.Mode_label)
         self.addRow(PlannerDesc, self.Planner_label)
 
+        self.addRow(hLine1)
+        self.addRow(PDesc)
         self.addRow(PlannerRFDesc, self.PlannerRFDesc_label)
         self.addRow(PlannerCPDesc, self.PlannerCPDesc_label)
         self.addRow(PingDesc, self.PingDesc_label)
-
 
     def deinit(self):
         pass
@@ -124,10 +131,17 @@ class UAVStatusVisualizer(QFormLayout):
         self.planner_signal.emit(msg.data)
     
     def phasesync_rf_callback(self, msg):
-        self.teaming_planner_rf_signal.emit(str(msg.data.phase))
+        self.teaming_planner_rf_signal.emit(msg.phase)
+        # if hasattr(msg, 'phase'):
+        #     print(msg.phase, type(msg.phase))
+        #     self.teaming_planner_rf_signal.emit(msg.phase)
+        # else:
+        #     print("Thanks DSO")
+        #     print(msg)
+        
 
     def phasesync_cp_callback(self, msg):
-        self.teaming_planner_cp_signal.emit(str(msg.data.phase))
+        self.teaming_planner_cp_signal.emit(msg.phase)
 
     def showflightmodeStatus(self, data):
         self.FlightMode_label.setText(data)
@@ -142,23 +156,23 @@ class UAVStatusVisualizer(QFormLayout):
         self.Planner_label.setText(data)
 
     def showTeamingPlannerRFStatus(self, data):
-        self.PlannerRFDesc_label.setText(data)
+        self.PlannerRFDesc_label.setText(str(data))
 
     def showTeamingPlannerCPStatus(self, data):
-        self.PlannerCPDesc_label.setText(data)
+        self.PlannerCPDesc_label.setText(str(data))
 
     def ping_timer_callback(self):
-        out = ping(self.ping_server, verbose=False, count=1, size=36, timeout=6)
+        # out = ping(self.ping_server, verbose=False, count=1, size=36, timeout=6)
 
-        time_out_flag = "Request timed out"
-        if re.findall(str(out), time_out_flag): # if output has the sentence Reques timed out ..
-            print("Ping time out!")
-            self.PingDesc_label.setText("Time out! >6s")
-        else:
-            out = str(out).split('/') # the avg substring in the output string
-            avg = out[3]
-            print("Ping is {}".format(str(avg)))
-            self.PingDesc_label.setText(str(avg))
+        # time_out_flag = "Request timed out"
+        # if re.findall(str(out), time_out_flag): # if output has the sentence Reques timed out ..
+        #     print("Ping time out!")
+        #     self.PingDesc_label.setText("Time out! >6s")
+        # else:
+        #     out = str(out).split('/') # the avg substring in the output string
+        #     avg = out[3]
+        #     print("Ping is {}".format(str(avg)))
+        #     self.PingDesc_label.setText(str(avg))
         pass
 
 class PingTimerThread(QThread):

@@ -13,6 +13,20 @@ from mt_msgs.msg import phaseAndTime
 # from pythonping import ping 
 import re
 
+class PingTimerThread(QThread):
+    def __init__(self, callback):
+        QThread.__init__(self)
+        self.timer = QTimer()
+        self.timer.setInterval(int(1000)) # in ms
+        self.timer.timeout.connect(callback) # run the callback every 1s
+        self.timer.start()
+        
+    def __del__(self):
+        self.wait()
+
+    def run(self):        
+        pass
+
 class UAVStatusVisualizer(QFormLayout):
     flightmode_signal = qt.QtCore.pyqtSignal(str) #flight mode
     battery_signal = qt.QtCore.pyqtSignal(float) #Battery level
@@ -37,7 +51,7 @@ class UAVStatusVisualizer(QFormLayout):
         self.ping_server = ping_server # server to ping to, kian wee lapotop '192.168.1.3'
 
         # Start Ping Timer thread, ping might be a blocking function so a seperate thread is used
-        self.ping_timer_thread = self.PingTimerThread(self.ping_timer_callback)
+        self.ping_timer_thread = PingTimerThread(self.ping_timer_callback)
         self.ping_timer_thread.start()
 
         self.createLayout(name)
@@ -165,7 +179,7 @@ class UAVStatusVisualizer(QFormLayout):
         out_text = self.myping(self.ping_server)
         self.PingDesc_label.setText(out_text)
 
-    def myping(host):
+    def myping(self, host):
         response = os.popen("ping -c 1 " + host).read()
         response_split = response.split()
         idx = 0 
@@ -181,17 +195,4 @@ class UAVStatusVisualizer(QFormLayout):
                 return(min_avg_max_mdev_split[2])
             idx += 1
 
-class PingTimerThread(QThread):
-    def __init__(self, callback):
-        QThread.__init__(self)
-        self.timer = QTimer()
-        self.timer.setInterval(int(1000)) # in ms
-        self.timer.timeout.connect(callback) # run the callback every 1s
-        self.timer.start()
-        
-    def __del__(self):
-        self.wait()
-
-    def run(self):        
-        pass
 

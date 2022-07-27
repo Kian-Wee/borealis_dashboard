@@ -4,7 +4,6 @@ import rospkg
 import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from PyQt5.QtWidgets import QFormLayout
-import maths
 import os
 from mavros_msgs.msg import State
 from sensor_msgs.msg import BatteryState

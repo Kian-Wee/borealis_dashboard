@@ -4,7 +4,8 @@ import rospkg
 import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from PyQt5.QtWidgets import QFormLayout
-import math
+import maths
+import os
 from mavros_msgs.msg import State
 from sensor_msgs.msg import BatteryState
 from std_msgs.msg import String
@@ -37,8 +38,8 @@ class UAVStatusVisualizer(QFormLayout):
         self.ping_server = ping_server # server to ping to, kian wee lapotop '192.168.1.3'
 
         # Start Ping Timer thread, ping might be a blocking function so a seperate thread is used
-        # self.ping_timer_thread = self.PingTimerThread(self.ping_timer_callback)
-        # self.ping_timer_thread.start()
+        self.ping_timer_thread = self.PingTimerThread(self.ping_timer_callback)
+        self.ping_timer_thread.start()
 
         self.createLayout(name)
 
@@ -162,25 +163,31 @@ class UAVStatusVisualizer(QFormLayout):
         self.PlannerCPDesc_label.setText(str(data))
 
     def ping_timer_callback(self):
-        # out = ping(self.ping_server, verbose=False, count=1, size=36, timeout=6)
+        out_text = self.myping(self.ping_server)
+        self.PingDesc_label.setText(out_text)
 
-        # time_out_flag = "Request timed out"
-        # if re.findall(str(out), time_out_flag): # if output has the sentence Reques timed out ..
-        #     print("Ping time out!")
-        #     self.PingDesc_label.setText("Time out! >6s")
-        # else:
-        #     out = str(out).split('/') # the avg substring in the output string
-        #     avg = out[3]
-        #     print("Ping is {}".format(str(avg)))
-        #     self.PingDesc_label.setText(str(avg))
-        pass
+    def myping(host):
+        response = os.popen("ping -c 1 " + host).read()
+        response_split = response.split()
+        idx = 0 
+        for string in response_split:
+            # find the index that has min/avg/max/mdev
+            if string == 'min/avg/max/mdev':
+                # min_avg_max_mdev values is 2 index later
+                min_avg_max_mdev = response_split[idx + 2]
+                # split them up
+                min_avg_max_mdev_split = min_avg_max_mdev.split('/')
+                # the avg value index
+                print(min_avg_max_mdev_split[2])
+                return(min_avg_max_mdev_split[2])
+            idx += 1
 
 class PingTimerThread(QThread):
     def __init__(self, callback):
         QThread.__init__(self)
         self.timer = QTimer()
         self.timer.setInterval(int(1000)) # in ms
-        self.timer.timeout.connect(callback)
+        self.timer.timeout.connect(callback) # run the callback every 1s
         self.timer.start()
         
     def __del__(self):

@@ -6,7 +6,7 @@ import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
-from uwb_msgs.msg import UUBmsg, UWBReading
+# from uwb_msgs.msg import UUBmsg, UWBReading
 from std_srvs.srv import SetBool
 from topic_visualizer import TopicVisualize
 from local_position_visualizer import PositionVisualizer
@@ -90,7 +90,7 @@ class Human_Diagnostic(QObject):
         hLine2.setFrameShape(qt.QtWidgets.QFrame.HLine)
         hLine2.setFrameShadow(qt.QtWidgets.QFrame.Sunken)
 
-        self.uwb_viz = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
+        # self.uwb_viz = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
 
         hLine3 = qt.QtWidgets.QFrame()
         hLine3.setFrameShape(qt.QtWidgets.QFrame.HLine)
@@ -100,7 +100,7 @@ class Human_Diagnostic(QObject):
        
         boxLayout.addLayout(layout)
         boxLayout.addWidget(hLine1)
-        boxLayout.addLayout(self.uwb_viz)
+        # boxLayout.addLayout(self.uwb_viz)
         boxLayout.addWidget(hLine2)
         boxLayout.addLayout(self.odom_viz)
         boxLayout.addWidget(hLine3)

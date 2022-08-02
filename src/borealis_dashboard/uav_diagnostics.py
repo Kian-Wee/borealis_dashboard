@@ -3,7 +3,6 @@ import rospkg
 
 import PyQt5 as qt
 from PyQt5.QtCore import QObject, QThread, QTimer
-from uwb_msgs.msg import UUBmsg, UWBReading
 from topic_visualizer import TopicVisualize
 from target_visualizer import TargetVisualizer
 from button_service import ButtonService
@@ -41,8 +40,8 @@ class UAV_Diagnostic(QObject):
         self.uwb_started = False
         
         # Create service buttons
-        self.uwb_button = ButtonService(uwb_service, "UWB", "UAV")
-        self.datafeed_button = ButtonService(datafeed_service, "DataFeed", "UAV")
+        # self.uwb_button = ButtonService(uwb_service, "UWB", "UAV")
+        # self.datafeed_button = ButtonService(datafeed_service, "DataFeed", "UAV")
 
         # self.createLayout(self.layout, self.uav_name)
         self.createInterface()
@@ -50,7 +49,7 @@ class UAV_Diagnostic(QObject):
         rospy.Rate(2) # Run at lower rate to prevent bandwidth saturation
 
     def createInterface(self):
-        self.uwb_layout = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
+        # self.uwb_layout = TopicVisualize(self.uwb_topic, UUBmsg, "UWB")
         self.odometry_layout = TopicVisualize(self.odom_topic, Odometry, "Odometry")
         self.odometry_values_layout = TargetVisualizer(self.target_topic, "Target")
         # self.odometry_values_layout = PositionVisualizer(self.target_topic, "Target")
@@ -86,8 +85,8 @@ class UAV_Diagnostic(QObject):
 
         vSpacer  = qt.QtWidgets.QSpacerItem(20, 40, qt.QtWidgets.QSizePolicy.Minimum, qt.QtWidgets.QSizePolicy.Expanding)
        
-        boxLayout.addLayout(self.uwb_layout)
-        boxLayout.addWidget(hLine1)
+        # boxLayout.addLayout(self.uwb_layout)
+        # boxLayout.addWidget(hLine1)
 
         boxLayout.addLayout(self.odometry_layout)
         boxLayout.addWidget(hLine2)
@@ -104,8 +103,8 @@ class UAV_Diagnostic(QObject):
         boxLayout.addLayout(self.uav_status_layout)
         boxLayout.addItem(vSpacer)
         
-        boxLayout.addWidget(self.uwb_button)
-        boxLayout.addWidget(self.datafeed_button)
+        # boxLayout.addWidget(self.uwb_button)
+        # boxLayout.addWidget(self.datafeed_button)
 
         group = qt.QtWidgets.QGroupBox(self.uav_name)
         group.setStyleSheet("QGroupBox { border: 1px solid black; }")

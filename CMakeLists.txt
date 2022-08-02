@@ -75,7 +75,6 @@ catkin_python_setup()
 generate_messages(
    DEPENDENCIES
    std_msgs  # Or other packages containing msgs
-   uwb_msgs
    mt_msgs
 )
 

@@ -42,7 +42,7 @@ uav2_datafeed_enable_service: /uav2_ros_launcher/datafeed
 ###### UAV 3 Parameters #####
 uav3_uwb_topic: /UAV3PoseUWB
 uav3_odometry_topic: /uav3/t265/odom/sample
-uav3_target_topic: /uav3/command/pose
+uav3_target_topic: /uav3/mavros/setpoint_position/local
 uav3_uwb_enable_service: /uav3_ros_launcher/uwb
 uav3_datafeed_enable_service: /uav3_ros_launcher/datafeed
 
